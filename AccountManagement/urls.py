@@ -1,9 +1,7 @@
-from django.urls import path
-from .views import AccountAPIView
-from rest_framework.authtoken.views import obtain_auth_token
+from django.urls import include, path
+
 
 urlpatterns = [
-    path('register/', AccountAPIView.as_view(), name='register'),
-    path('login/', obtain_auth_token, name='login'),
-    path('logout/', AccountAPIView.as_view(), name='logout')
+    path('auth/', include('dj_rest_auth.urls')),
+    path('auth/register/', include('dj_rest_auth.registration.urls'))
 ]

@@ -1,3 +1,5 @@
+"""
+
 from django.shortcuts import render
 from rest_framework import viewsets
 from django.contrib.auth.models import User, auth
@@ -9,6 +11,9 @@ from .serializers import AccountSerializer
 from rest_framework.response import Response
 from rest_framework import status
 
+"""
+
+"""
 
 # Create your views here.
 class AccountAPIView(CreateAPIView):
@@ -33,3 +38,5 @@ class AccountAPIView(CreateAPIView):
     def logout(self, request, format=None):
         # delete user token, something like: request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
+
+"""
