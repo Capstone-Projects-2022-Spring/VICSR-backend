@@ -24,5 +24,11 @@ class Document(models.Model):
     language = models.CharField(max_length=50)
     trans_language = models.CharField(max_length=50, blank=True)
 
+    #saves file to user folder, and filename becomes folder for all files associated with document
+    def save(self, *args, **kwargs):
+        self.file.name = (str(self.owner_id) + "/" + self.filename + "/" + self.file.name)
+        super(Document, self).save(*args, **kwargs)
+
     def __str__(self):
         return self.filename
+
