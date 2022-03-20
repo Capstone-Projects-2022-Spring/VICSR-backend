@@ -1,5 +1,0 @@
-AccountManagement
-DocumentManagement
-DocumentProcessing
-VocabularyManagement
-backend
