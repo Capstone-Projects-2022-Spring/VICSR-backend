@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -7,6 +8,11 @@ from django.core.files.storage import FileSystemStorage
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from django.conf import settings
+from django.contrib.auth import get_user, get_user_model
+from django.contrib.sessions.models import Session
+from django.contrib.auth.models import User
+from rest_framework.decorators import api_view
 
 
 # Create your views here.
@@ -16,42 +22,47 @@ class DocumentView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication, )
                               # SessionAuthentication)
 
-    # need serializer and related functionality still (add, delete, rename, etc.)
-    # need to also figure out how to just return specific users documents
-
     # basically returns the document list
     queryset = Document.objects.all()
 
     model = Document
     serializer_class = DocumentSerializer
 
+    @api_view(['GET'])
+    def ApiOverview(self, request):
+        api_urls = {
+            'all_docs': '/',
+            'Add': '/add',
+            'Delete': '/doc/pk/delete'
+        }
+        return Response(api_urls)
 
-"""
-    parser_classes = (MultiPartParser, FormParser)
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    @api_view(['POST'])
+    def add_doc(request):
+        doc = DocumentSerializer(data=request.data)
+        if doc.is_valid():
+            doc.save()
+            return Response(doc.data)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def get_doc(self, pk):
-        try:
-            return Document.objects.get(pk=pk)
-        except Document.DoesNotExist:
+    @api_view(['GET'])
+    def get_docs(request):
+
+        print(request.user.id)
+
+        docs = Document.objects.filter(owner_id=request.user.id)
+        print(docs.count())
+
+        if docs:
+            serializer = DocumentSerializer(docs, many=True)
+            return Response(serializer.data)
+
+        else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def get(self, request, *args, **kwargs):
-        docs = Document.objects.all()
-        serializer = DocumentSerializer(docs)
-        return Response(serializer.data)
-
-    def post(self, request, *args, **kwargs):
-        serializer = DocumentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-    def delete(self, request, pk, *args, **kwargs):
-        Document.objects.get(pk=pk).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT) 
-
-"""
+    @api_view(['DELETE'])
+    def delete_doc(request, pk):
+        doc = get_object_or_404(Document, pk=pk)
+        doc.delete()
+        return Response(status=status.HTTP_202_ACCEPTED)

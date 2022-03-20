@@ -20,13 +20,14 @@ from django.conf.urls.static import static
 from rest_framework import routers
 from DocumentManagement import views
 
-router = routers.DefaultRouter()
-router.register(r'docs', views.DocumentView, 'docs')
+# router = routers.DefaultRouter()
+# router.register(r'docs', views.DocumentView, 'docs')
 
 urlpatterns = [
     re_path('admin/', admin.site.urls),
     re_path('api/users/', include('AccountManagement.urls')),
-    path('api/', include(router.urls)),
+    # path('api/', include(router.urls)),
+    path('api/docs/', include('DocumentManagement.urls'))
 ]
 
 if settings.DEBUG:
