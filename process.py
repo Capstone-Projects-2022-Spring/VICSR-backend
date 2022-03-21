@@ -72,10 +72,11 @@ straight_img = cv2.warpAffine(straight_img, M, (w, h), flags=cv2.INTER_CUBIC, bo
 cv2.imshow("straight", straight_img)
 cv2.waitKey(0)
 
-gray_img = cv2.cvtColor(straight_img, cv2.COLOR_BGR2GRAY)
-kernel = np.ones((2, 2), np.uint8)
-final_img = cv2.erode(gray_img, kernel, iterations=1)
-# final_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+kernel = np.ones((3, 1), np.uint8)
+erode_img = cv2.erode(straight_img, kernel, iterations=1)
 
-cv2.imshow("final", final_img)
+cv2.imshow("erode", erode_img)
 cv2.waitKey(0)
+
+# cv2.imshow("final", final_img)
+# cv2.waitKey(0)

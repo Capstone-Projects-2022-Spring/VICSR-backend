@@ -99,7 +99,7 @@ class DocumentView(viewsets.ModelViewSet):
         api_urls = {
             'all_docs': '/',
             'Add': '/add',
-            'Delete': '/doc/pk/delete'
+            'Delete': '/doc/delete/pk'
         }
         return Response(api_urls)
 
