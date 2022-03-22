@@ -51,8 +51,10 @@ class DocumentView(viewsets.ModelViewSet):
 
         print(request.user.id)
 
-        docs = Document.objects.filter(owner_id=request.user.id)
+        #docs ordered by filename (alphabetically, then secondary order is by id which is incremented based on upload order
+        docs = Document.objects.filter(owner_id=request.user.id).order_by('filename')
         print(docs.count())
+        print(docs.values())
 
         if docs:
             serializer = DocumentSerializer(docs, many=True)
