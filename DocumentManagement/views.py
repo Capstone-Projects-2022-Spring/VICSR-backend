@@ -39,7 +39,10 @@ class DocumentView(viewsets.ModelViewSet):
 
     @api_view(['POST'])
     def add_doc(request):
+
+        request.data['owner_id'] = request.user.id
         doc = DocumentSerializer(data=request.data)
+
         if doc.is_valid():
             doc.save()
             return Response(doc.data)
