@@ -11,6 +11,11 @@ from backend.storage_backends import MediaStorage
 # Deck List
 
 class Document(models.Model):
+    FILE_EXT = [
+        'jpg',
+        'png',
+        'pdf'
+    ]
     MODE_CHOICES = [
         ('TRL', 'Translation'),
         ('DEF', 'Definition')
@@ -27,13 +32,6 @@ class Document(models.Model):
     #saves file to user folder, and filename becomes folder for all files associated with document
     def save(self, *args, **kwargs):
         self.file.name = (str(self.owner_id) + "/" + self.filename + "/" + self.file.name)
-        #second = Document(owner_id=self.owner_id, filename=self.filename, file=self.file,
-                        #  date_added=self.date_added, mode=self.mode, language=self.language,
-                       #   trans_language=self.trans_language)
-        ####endless loop!!
-       # second.file.name = (str(self.owner_id) + "/" + self.filename + "/" + "2")
-        #print(second)
-        #second.save()
         super(Document, self).save(*args, **kwargs)
 
     def __str__(self):
