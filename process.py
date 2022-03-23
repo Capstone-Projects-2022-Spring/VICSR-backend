@@ -14,6 +14,8 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True, help="path to input image to be OCR'd")
 args = vars(ap.parse_args())
 
+# pytesseract.pytesseract.tesseract_cmd = '/usr/local/Cellar/tesseract/5.1.0/share/tessdata/'
+tess_config = r'--tessdata-dir "/usr/local/Cellar/tesseract/5.1.0/share/tessdata/"'
 img = cv2.imread(args["image"])
 
 
@@ -119,5 +121,7 @@ def get_output(image):
             text_list.append(i[0])
             print(i[0])
 
+# pytesseract.pytesseract.tesseract_cmd("/usr/local/Cellar/tesseract/5.1.0/share/tessdata/")
+print(pytesseract.image_to_string(final_img, lang="eng", config=tess_config))
 
 get_output(final_img)
