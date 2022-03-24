@@ -14,15 +14,13 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True, help="path to input image to be OCR'd")
 args = vars(ap.parse_args())
 
-# pytesseract.pytesseract.tesseract_cmd = '/usr/local/Cellar/tesseract/5.1.0/share/tessdata/'
-tess_config = r'--tessdata-dir "/usr/local/Cellar/tesseract/5.1.0/share/tessdata/"'
 img = cv2.imread(args["image"])
 
 
 def get_skew_angle(image):
 
-    cv2.imshow("original", image)
-    cv2.waitKey(0)
+    # cv2.imshow("original", image)
+    # cv2.waitKey(0)
 
     # https://becominghuman.ai/how-to-automatically-deskew-straighten-a-text-image-using-opencv-a0c30aed83df
     img_copy = image.copy()
@@ -74,8 +72,8 @@ else:
     final_img = img
 
 
-cv2.imshow("final", final_img)
-cv2.waitKey(0)
+# cv2.imshow("final", final_img)
+# cv2.waitKey(0)
 
 # https://dev.to/zirkelc/extract-highlighted-text-from-a-book-using-python-e15
 
@@ -91,6 +89,10 @@ def gen_word_boxes(image):
     img_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     gray_img = img_hsv[:, :, 2]
     out_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 22)
+
+    # tess_config = '--tessdata-dir "/usr/local/Cellar/tesseract/5.1.0/share/tessdata/"'
+    # pytesseract.pytesseract.tesseract_cmd("/usr/local/Cellar/tesseract/5.1.0/share/tessdata/")
+
     d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
     n_boxes = len(d['text'])
     for i in range(n_boxes):
@@ -121,7 +123,11 @@ def get_output(image):
             text_list.append(i[0])
             print(i[0])
 
+
+# tess_config = r'--tessdata-dir "/usr/local/Cellar/tesseract/5.1.0/share/tessdata/"'
 # pytesseract.pytesseract.tesseract_cmd("/usr/local/Cellar/tesseract/5.1.0/share/tessdata/")
-print(pytesseract.image_to_string(final_img, lang="eng", config=tess_config))
+# print(pytesseract.image_to_string(final_img, lang="eng", config=tess_config))
+# print(pytesseract.image_to_string(final_img))
+
 
 get_output(final_img)
