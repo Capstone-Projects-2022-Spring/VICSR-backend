@@ -19,8 +19,8 @@ img = cv2.imread(args["image"])
 
 def get_skew_angle(image):
 
-    cv2.imshow("original", image)
-    cv2.waitKey(0)
+    # cv2.imshow("original", image)
+    # cv2.waitKey(0)
 
     # https://becominghuman.ai/how-to-automatically-deskew-straighten-a-text-image-using-opencv-a0c30aed83df
     img_copy = image.copy()
@@ -72,5 +72,62 @@ else:
     final_img = img
 
 
-cv2.imshow("final", final_img)
-cv2.waitKey(0)
+# cv2.imshow("final", final_img)
+# cv2.waitKey(0)
+
+# https://dev.to/zirkelc/extract-highlighted-text-from-a-book-using-python-e15
+
+
+def reduce_noise(image):
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    denoised_img = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=1)
+    return denoised_img
+
+
+def gen_word_boxes(image):
+    boundary_list = []
+    img_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    gray_img = img_hsv[:, :, 2]
+    out_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 22)
+
+    # tess_config = '--tessdata-dir "/usr/local/Cellar/tesseract/5.1.0/share/tessdata/"'
+    # pytesseract.pytesseract.tesseract_cmd("/usr/local/Cellar/tesseract/5.1.0/share/tessdata/")
+
+    d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
+    n_boxes = len(d['text'])
+    for i in range(n_boxes):
+        if int(float(d['conf'][i])) > 60:
+            boundary = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+            word = d['text'][i]
+            boundary_list.append((word, boundary))
+    return boundary_list
+
+
+def check_highlight_amount(image, item: tuple):
+    boundary = item[1]
+    cropped = image[boundary[1]:(boundary[3]+boundary[1]), boundary[0]:(boundary[2]+boundary[0])]
+    lower_values = np.array([0, 75, 150])
+    upper_values = np.array([180, 255, 255])
+    hsv_img = cv2.cvtColor(cropped, cv2.COLOR_BGR2HSV)
+    hsv_mask = cv2.inRange(hsv_img, lower_values, upper_values)
+
+    ratio = cv2.countNonZero(hsv_mask) / (cropped.size / 3)
+    return np.round(ratio * 100, 2)
+
+
+def get_output(image):
+    boundary_list = gen_word_boxes(image)
+    text_list = []
+    for i in boundary_list:
+        if check_highlight_amount(image, i) >= 50.0:
+            text_list.append(i[0])
+            print(i[0])
+
+
+# tess_config = r'--tessdata-dir "/usr/local/Cellar/tesseract/5.1.0/share/tessdata/"'
+# pytesseract.pytesseract.tesseract_cmd("/usr/local/Cellar/tesseract/5.1.0/share/tessdata/")
+# print(pytesseract.image_to_string(final_img, lang="eng", config=tess_config))
+# print(pytesseract.image_to_string(final_img))
+
+
+get_output(final_img)
