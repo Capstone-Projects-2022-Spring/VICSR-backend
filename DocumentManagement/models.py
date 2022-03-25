@@ -1,6 +1,44 @@
 from django.conf import settings
 from django.db import models
 from backend.storage_backends import MediaStorage
+
+
+class Document(models.Model):
+    MODE_CHOICES = [
+        ('TRL', 'Translation'),
+        ('DEF', 'Definition')
+    ]
+    owner_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    filename = models.CharField(max_length=30)
+    #file = models.FileField(storage=MediaStorage())
+    # size = models.IntegerField()
+    date_added = models.DateTimeField(auto_now_add=True)
+    mode = models.CharField(max_length=3, choices=MODE_CHOICES)
+    language = models.CharField(max_length=50)
+    trans_language = models.CharField(max_length=50, blank=True)
+
+    def __str__(self):
+        return self.filename
+
+
+class File(models.Model):
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(storage=MediaStorage())
+
+    def save(self, *args, **kwargs):
+        self.file.name = (str(self.document.owner_id) + "/" + self.document.filename + "/" + self.file.name)
+        super(File, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.file.name
+
+
+
+
+
+"""from django.conf import settings
+from django.db import models
+from backend.storage_backends import MediaStorage
 from pdf2image import convert_from_path, convert_from_bytes
 import io
 
@@ -57,3 +95,4 @@ class Document(models.Model):
     def __str__(self):
         return self.filename
 
+"""
