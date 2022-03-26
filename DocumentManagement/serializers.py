@@ -12,7 +12,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
         fields = ('id', 'owner_id', 'filename', 'files',
-                'mode', 'language', 'trans_language')
+                  'date_added', 'mode', 'language', 'trans_language')
         #fields = '__all__'
         #'date_added',
 
@@ -29,7 +29,9 @@ class DocumentSerializer(serializers.ModelSerializer):
 def pdf_images(document, file):
     name = str(file)[:-4]
     data = file.read()
-    images = convert_from_bytes(data, poppler_path=r'C:\Program Files\poppler-0.68.0\bin', fmt="png")
+    #In windows had to hardcode path
+    #images = convert_from_bytes(data, poppler_path=r'C:\Program Files\poppler-0.68.0\bin', fmt="png")
+    images = convert_from_bytes(data, fmt="png")
     for i, image in enumerate(images):
         f_name = name + str(i) + ".png"
         image_io = io.BytesIO()

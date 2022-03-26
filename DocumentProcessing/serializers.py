@@ -22,7 +22,9 @@ class FileSerializer(serializers.ModelSerializer):
 def pdf_images(document, file):
     name = str(file)[:-4]
     data = file.read()
-    images = convert_from_bytes(data, poppler_path=r'C:\Program Files\poppler-0.68.0\bin', fmt="png")
+    # In windows had to hardcode path
+    #images = convert_from_bytes(data, poppler_path=r'C:\Program Files\poppler-0.68.0\bin', fmt="png")
+    images = convert_from_bytes(data, fmt="png")
     for i, image in enumerate(images):
         f_name = name + str(i) + ".png"
         image_io = io.BytesIO()
