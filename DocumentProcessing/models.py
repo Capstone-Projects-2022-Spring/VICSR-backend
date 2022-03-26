@@ -1,4 +1,7 @@
+from django.conf import settings
 from django.db import models
+from backend.storage_backends import MediaStorage
+from DocumentManagement.models import Document
 
 # Create your models here.
 
@@ -7,6 +10,18 @@ from django.db import models
 #Document Preprocessing
     #List of words in Doc
 #Highlight exraction
+
+class File(models.Model):
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(storage=MediaStorage())
+
+    def save(self, *args, **kwargs):
+        self.file.name = (str(self.document.owner_id) + "/" + self.document.filename + "/" + self.file.name)
+        super(File, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.file.name
+
 
 
 """ commenting out -- not relevant for milestone 1 and may need reworking 

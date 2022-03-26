@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 
 
-# Create your views here.
+
 class DocumentView(viewsets.ModelViewSet):
 
     permission_classes = (IsAuthenticated,)
@@ -52,10 +52,7 @@ class DocumentView(viewsets.ModelViewSet):
     @api_view(['GET'])
     def get_docs(request):
 
-        print(request.user.id)
-
-        #docs ordered by filename (alphabetically, then secondary order is by id which is incremented based on upload order
-        docs = Document.objects.filter(owner_id=request.user.id).order_by('filename')
+        docs = Document.objects.filter(owner_id=request.user.id)
         print(docs.count())
         print(docs.values())
 

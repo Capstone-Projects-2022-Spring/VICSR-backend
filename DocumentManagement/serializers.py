@@ -1,14 +1,10 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import serializers
-from .models import Document, File
+from .models import Document
+from DocumentProcessing.serializers import FileSerializer
+from DocumentProcessing.models import File
 from pdf2image import convert_from_bytes
 import io
-
-
-class FileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = File
-        fields = '__all__'
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -25,7 +21,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         document = Document.objects.create(**validated_data)
         for file in files.values():
             if (str(file)[-3:]=='pdf'):
-                pdf_images(document, file)
+               pdf_images(document, file)
             else:
                 File.objects.create(document=document, file=file)
         return document
