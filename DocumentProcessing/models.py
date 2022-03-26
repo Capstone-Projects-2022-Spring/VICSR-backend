@@ -1,7 +1,18 @@
+from io import BytesIO
+
+import numpy
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
+try:
+    from PIL import Image  # PIL is the pillow
+except ImportError:
+    import Image
 from django.conf import settings
 from django.db import models
 from backend.storage_backends import MediaStorage
 from DocumentManagement.models import Document
+from .process import main as process
+import cv2
 
 # Create your models here.
 
@@ -16,6 +27,15 @@ class File(models.Model):
     file = models.FileField(storage=MediaStorage())
 
     def save(self, *args, **kwargs):
+        ##open file as PIL Image and send for processing
+        pil_image_obj = Image.open(self.file.file)
+        new = process(pil_image_obj)
+        ##after processed save as file and replace file in model
+        image_io = BytesIO()
+        new.save(image_io, format="PNG")
+        image_file = InMemoryUploadedFile(image_io, None, self.file.name, 'image/png',
+                                          image_io.tell(), None)
+        self.file = image_file
         self.file.name = (str(self.document.owner_id) + "/" + self.document.filename + "/" + self.file.name)
         super(File, self).save(*args, **kwargs)
 
