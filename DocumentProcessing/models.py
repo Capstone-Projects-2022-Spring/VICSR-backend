@@ -11,7 +11,7 @@ from django.conf import settings
 from django.db import models
 from backend.storage_backends import MediaStorage
 from DocumentManagement.models import Document
-from .process import main as process
+from .process import preprocess
 import cv2
 
 # Create your models here.
@@ -29,7 +29,7 @@ class File(models.Model):
     def save(self, *args, **kwargs):
         ##open file as PIL Image and send for processing
         pil_image_obj = Image.open(self.file.file)
-        new = process(pil_image_obj)
+        new = preprocess(pil_image_obj)
         ##after processed save as file and replace file in model
         image_io = BytesIO()
         new.save(image_io, format="PNG")
@@ -44,16 +44,15 @@ class File(models.Model):
 
 
 
-""" commenting out -- not relevant for milestone 1 and may need reworking 
-leaving as starting point when returning
-
-
 class DocumentWords(models.Model):
-    generated_by = models.ForeignKey(Document, on_delete=models.CASCADE)
+    document = models.ForeignKey(Document, on_delete=models.CASCADE)
+    file = models.ForeignKey(File, on_delete=models.CASCADE)
     word = models.CharField(max_length=65)
     ##coordinates from tesseract - may want to change
     left = models.IntegerField()
     top = models.IntegerField()
     width = models.IntegerField()
     height = models.IntegerField()
-    """
+
+    def __str__(self):
+        return self.word

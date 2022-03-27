@@ -59,7 +59,7 @@ def reduce_noise(image):
 
 
 
-def main(image):
+def preprocess(image):
     #input is PIL Image -> convert to CV image format
     img =cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
 
