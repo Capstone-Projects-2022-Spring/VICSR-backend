@@ -1,6 +1,7 @@
 from io import BytesIO
 import numpy
 import cv2
+import string
 import pytesseract
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from pytesseract import Output
@@ -27,7 +28,8 @@ def get_words(image, document, file):
     n_boxes = len(d['text'])
     for i in range(n_boxes):
         if int(float(d['conf'][i])) > 60:
-            DocumentWord.objects.create(document=document, file=file, word=d['text'][i],
+            word = (d['text'][i]).translate(str.maketrans('', '', string.punctuation))
+            DocumentWord.objects.create(document=document, file=file, word=word,
                                          left=d['left'][i], top=d['top'][i],
                                          width=d['width'][i], height=d['height'][i])
 
