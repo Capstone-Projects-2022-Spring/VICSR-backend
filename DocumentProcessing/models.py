@@ -24,7 +24,13 @@ def get_words(image, document, file):
     gray_img = img_hsv[:, :, 2]
     out_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 22)
 
-    set = StudySet.objects.create(generated_by=document, title=document.filename)
+    #check if study set exists or not -- if not create it
+    query = StudySet.objects.filter(generated_by=document)
+    if (len(query)==0):
+        set = StudySet.objects.create(generated_by=document, title=document.filename)
+    else:
+        set = query
+
 
     # extract and add to database
     d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
@@ -37,9 +43,6 @@ def get_words(image, document, file):
                                          width=d['width'][i], height=d['height'][i])
             amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
             if (amount>=50.0):
-                # create studysetword here --- need a studyset reference.  Maybe change studyset ref to doc ref?
-                print(amount)
-                print(word)
                 w = StudySetWord.objects.create(parent_set=set, word=word, translation="", definition="")
 
 
