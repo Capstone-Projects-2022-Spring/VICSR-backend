@@ -1,26 +1,38 @@
 from io import BytesIO
-
 import numpy
+import cv2
+import string
+import pytesseract
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from pytesseract import Output
 
 try:
     from PIL import Image  # PIL is the pillow
 except ImportError:
     import Image
-from django.conf import settings
 from django.db import models
 from backend.storage_backends import MediaStorage
 from DocumentManagement.models import Document
-from .process import main as process
-import cv2
-
-# Create your models here.
+from .process import preprocess
 
 
-#ocumentProcessing related models/functionality:
-#Document Preprocessing
-    #List of words in Doc
-#Highlight exraction
+def get_words(image, document, file):
+    image = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
+    # remove highlight for OCR extraction
+    img_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    gray_img = img_hsv[:, :, 2]
+    out_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 22)
+
+    # extract and add to database
+    d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
+    n_boxes = len(d['text'])
+    for i in range(n_boxes):
+        if int(float(d['conf'][i])) > 60:
+            word = (d['text'][i]).translate(str.maketrans('', '', string.punctuation))
+            DocumentWord.objects.create(document=document, file=file, word=word,
+                                         left=d['left'][i], top=d['top'][i],
+                                         width=d['width'][i], height=d['height'][i])
+
 
 class File(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='files')
@@ -29,7 +41,8 @@ class File(models.Model):
     def save(self, *args, **kwargs):
         ##open file as PIL Image and send for processing
         pil_image_obj = Image.open(self.file.file)
-        new = process(pil_image_obj)
+        new = preprocess(pil_image_obj)
+
         ##after processed save as file and replace file in model
         image_io = BytesIO()
         new.save(image_io, format="PNG")
@@ -39,21 +52,23 @@ class File(models.Model):
         self.file.name = (str(self.document.owner_id) + "/" + self.document.filename + "/" + self.file.name)
         super(File, self).save(*args, **kwargs)
 
+        ##process OCR and add words to DB
+        get_words(new, self.document, self)
+
     def __str__(self):
         return self.file.name
 
 
 
-""" commenting out -- not relevant for milestone 1 and may need reworking 
-leaving as starting point when returning
-
-
-class DocumentWords(models.Model):
-    generated_by = models.ForeignKey(Document, on_delete=models.CASCADE)
+class DocumentWord(models.Model):
+    document = models.ForeignKey(Document, on_delete=models.CASCADE)
+    file = models.ForeignKey(File, on_delete=models.CASCADE)
     word = models.CharField(max_length=65)
     ##coordinates from tesseract - may want to change
     left = models.IntegerField()
     top = models.IntegerField()
     width = models.IntegerField()
     height = models.IntegerField()
-    """
+
+    def __str__(self):
+        return self.word

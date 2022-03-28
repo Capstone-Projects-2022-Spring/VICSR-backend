@@ -1,12 +1,10 @@
-import argparse
-
-import numpy
+import numpy, cv2
 
 try:
     from PIL import Image  # PIL is the pillow
 except ImportError:
     import Image
-import cv2
+
 
 def get_skew_angle(image):
     # https://becominghuman.ai/how-to-automatically-deskew-straighten-a-text-image-using-opencv-a0c30aed83df
@@ -59,7 +57,7 @@ def reduce_noise(image):
 
 
 
-def main(image):
+def preprocess(image):
     #input is PIL Image -> convert to CV image format
     img =cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
 
@@ -75,4 +73,9 @@ def main(image):
     final_image = Image.fromarray(new_img)
 
     return final_image
+
+
+
+
+
 
