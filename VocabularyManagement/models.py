@@ -19,3 +19,11 @@ class StudySet(models.Model):
     title = models.CharField(max_length=30)
     date_added = models.DateTimeField(auto_now_add=True)
 
+class StudySetWord(models.Model):
+    parent_set = models.ForeignKey(StudySet, on_delete=models.CASCADE)
+    word = models.CharField(max_length=65)
+    translation = models.CharField(max_length=65, blank=True)
+    definition = models.CharField(max_length=65, blank=True)
+
+
+
