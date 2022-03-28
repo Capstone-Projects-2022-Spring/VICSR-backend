@@ -13,7 +13,8 @@ except ImportError:
 from django.db import models
 from backend.storage_backends import MediaStorage
 from DocumentManagement.models import Document
-from .process import preprocess
+from VocabularyManagement.models import StudySetWord
+from .process import preprocess, check_highlight_amount
 
 
 def get_words(image, document, file):
@@ -32,6 +33,12 @@ def get_words(image, document, file):
             DocumentWord.objects.create(document=document, file=file, word=word,
                                          left=d['left'][i], top=d['top'][i],
                                          width=d['width'][i], height=d['height'][i])
+            amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
+            if (amount>=50.0):
+                ##create studysetword here --- need a studyset reference.  Maybe change studyset ref to doc ref?
+                print(amount)
+                print(word)
+
 
 
 class File(models.Model):
