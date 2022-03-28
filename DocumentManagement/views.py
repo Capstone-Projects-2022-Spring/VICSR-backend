@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 
 
-# Create your views here.
+
 class DocumentView(viewsets.ModelViewSet):
 
     permission_classes = (IsAuthenticated,)
@@ -41,7 +41,7 @@ class DocumentView(viewsets.ModelViewSet):
     def add_doc(request):
 
         request.data['owner_id'] = request.user.id
-        doc = DocumentSerializer(data=request.data)
+        doc = DocumentSerializer(data=request.data, context={'request': request})
 
         if doc.is_valid():
             doc.save()
@@ -52,10 +52,9 @@ class DocumentView(viewsets.ModelViewSet):
     @api_view(['GET'])
     def get_docs(request):
 
-        print(request.user.id)
-
         docs = Document.objects.filter(owner_id=request.user.id)
         print(docs.count())
+        print(docs.values())
 
         if docs:
             serializer = DocumentSerializer(docs, many=True)

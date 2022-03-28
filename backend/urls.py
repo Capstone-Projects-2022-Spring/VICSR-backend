@@ -27,7 +27,8 @@ urlpatterns = [
     re_path('admin/', admin.site.urls),
     re_path('api/users/', include('AccountManagement.urls')),
     # path('api/', include(router.urls)),
-    path('api/docs/', include('DocumentManagement.urls'))
+    path('api/docs/', include('DocumentManagement.urls')),
+    path('api/files/', include('DocumentProcessing.urls'))
 ]
 
 if settings.DEBUG:
