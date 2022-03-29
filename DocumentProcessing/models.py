@@ -53,7 +53,7 @@ class File(models.Model):
         super(File, self).save(*args, **kwargs)
 
         ##process OCR and add words to DB
-        get_words(new, self.document, self)
+        #get_words(new, self.document, self)
 
     def __str__(self):
         return self.file.name
