@@ -1,4 +1,5 @@
-import numpy, cv2
+import cv2
+import numpy as np
 
 try:
     from PIL import Image  # PIL is the pillow
@@ -59,14 +60,14 @@ def reduce_noise(image):
 
 def preprocess(image):
     #input is PIL Image -> convert to CV image format
-    img =cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
+    img =cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
     skew = get_skew_angle(img)
     if skew != -90.0:
         new_img = rotate_image(skew, img)
     else:
         new_img = img
-    new_img = reduce_noise(new_img)
+    #new_img = reduce_noise(new_img)
 
     ##after processing -> return to PIL Image and return
     new_img = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
@@ -76,6 +77,14 @@ def preprocess(image):
 
 
 
+def check_highlight_amount(image, item: tuple):
+    boundary = item[1]
+    cropped = image[boundary[1]:(boundary[3]+boundary[1]), boundary[0]:(boundary[2]+boundary[0])]
+    lower_values = np.array([0, 75, 150])
+    upper_values = np.array([180, 255, 255])
+    hsv_img = cv2.cvtColor(cropped, cv2.COLOR_BGR2HSV)
+    hsv_mask = cv2.inRange(hsv_img, lower_values, upper_values)
 
-
+    ratio = cv2.countNonZero(hsv_mask) / (cropped.size / 3)
+    return np.round(ratio * 100, 2)
 
