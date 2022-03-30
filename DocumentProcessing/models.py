@@ -31,7 +31,6 @@ def get_words(image, document, file):
     else:
         set = query
 
-
     # extract and add to database
     d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
     n_boxes = len(d['text'])
@@ -44,6 +43,7 @@ def get_words(image, document, file):
             amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
             if (amount>=50.0):
                 w = StudySetWord.objects.create(parent_set=set, word=word, translation="", definition="")
+
 
 
 class File(models.Model):
@@ -65,7 +65,7 @@ class File(models.Model):
         super(File, self).save(*args, **kwargs)
 
         # process OCR and add words to DB
-        get_words(new, self.document, self)
+        #get_words(new, self.document, self)
 
     def __str__(self):
         return self.file.name
@@ -75,7 +75,6 @@ class DocumentWord(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
     file = models.ForeignKey(File, on_delete=models.CASCADE)
     word = models.CharField(max_length=65)
-    # coordinates from tesseract - may want to change
     left = models.IntegerField()
     top = models.IntegerField()
     width = models.IntegerField()

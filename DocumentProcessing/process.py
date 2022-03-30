@@ -67,7 +67,7 @@ def preprocess(image):
         new_img = rotate_image(skew, img)
     else:
         new_img = img
-    new_img = reduce_noise(new_img)
+    #new_img = reduce_noise(new_img)
 
     ##after processing -> return to PIL Image and return
     new_img = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
