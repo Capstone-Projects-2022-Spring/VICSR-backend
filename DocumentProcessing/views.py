@@ -41,7 +41,7 @@ class FileView(viewsets.ModelViewSet):
             file.save()
             return Response(file.data)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=file.errors)
 
     @api_view(['GET'])
     def get_files(request):
