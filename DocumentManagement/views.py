@@ -60,7 +60,8 @@ class DocumentView(viewsets.ModelViewSet):
             serializer = DocumentSerializer(docs, many=True)
             return Response(serializer.data)
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            data = {'Document Count': docs.count()}
+            return Response(status=status.HTTP_404_NOT_FOUND, data=data)
 
     @api_view(['DELETE'])
     def delete_doc(request, pk):
