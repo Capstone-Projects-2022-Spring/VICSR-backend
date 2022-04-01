@@ -41,7 +41,7 @@ class FileView(viewsets.ModelViewSet):
             file.save()
             return Response(file.data)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=file.errors)
 
     @api_view(['GET'])
     def get_files(request):
@@ -54,7 +54,8 @@ class FileView(viewsets.ModelViewSet):
             serializer = FileSerializer(files, many=True)
             return Response(serializer.data)
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            data = {'File Count': files.count()}
+            return Response(status=status.HTTP_404_NOT_FOUND, data=data)
 
     @api_view(['DELETE'])
     def delete_file(request, pk):

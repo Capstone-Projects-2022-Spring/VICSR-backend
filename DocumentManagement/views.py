@@ -47,7 +47,7 @@ class DocumentView(viewsets.ModelViewSet):
             doc.save()
             return Response(doc.data)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=doc.errors)
 
     @api_view(['GET'])
     def get_docs(request):
@@ -59,9 +59,9 @@ class DocumentView(viewsets.ModelViewSet):
         if docs:
             serializer = DocumentSerializer(docs, many=True)
             return Response(serializer.data)
-
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            data = {'Document Count': docs.count()}
+            return Response(status=status.HTTP_404_NOT_FOUND, data=data)
 
     @api_view(['DELETE'])
     def delete_doc(request, pk):
