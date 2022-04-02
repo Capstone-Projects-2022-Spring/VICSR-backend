@@ -33,7 +33,8 @@ class DocumentView(viewsets.ModelViewSet):
         api_urls = {
             'all_docs': '/',
             'Add': '/add',
-            'Delete': '/delete/pk'
+            'Delete': '/delete/pk',
+            'Update': '/update/pk'
         }
         return Response(api_urls)
 
@@ -53,8 +54,6 @@ class DocumentView(viewsets.ModelViewSet):
     def get_docs(request):
 
         docs = Document.objects.filter(owner_id=request.user.id)
-        print(docs.count())
-        print(docs.values())
 
         if docs:
             serializer = DocumentSerializer(docs, many=True)
@@ -66,8 +65,20 @@ class DocumentView(viewsets.ModelViewSet):
     @api_view(['DELETE'])
     def delete_doc(request, pk):
         doc = get_object_or_404(Document, pk=pk)
+
         if str(doc.owner_id_id) == str(request.user.id):
             doc.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+    @api_view(['POST'])
+    def update_doc(request, pk):
+
+        doc = Document.objects.get(id=pk)
+        doc.filename = request.data['filename']
+
+        doc.save(update_fields=['filename'])
+        return Response(doc.filename)
+
