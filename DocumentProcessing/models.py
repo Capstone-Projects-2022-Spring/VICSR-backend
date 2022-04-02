@@ -27,7 +27,7 @@ def get_words(image, document, file):
     #check if study set exists or not -- if not create it
     query = StudySet.objects.filter(generated_by=document)
     if (len(query)==0):
-        set = StudySet.objects.create(generated_by=document, title=document.filename)
+        set = StudySet.objects.create(owner_id=document.owner_id, generated_by=document, title=document.filename)
     else:
         set = query
 
@@ -37,9 +37,9 @@ def get_words(image, document, file):
     for i in range(n_boxes):
         if int(float(d['conf'][i])) > 60:
             word = (d['text'][i]).translate(str.maketrans('', '', string.punctuation))
-            DocumentWord.objects.create(document=document, file=file, word=word,
-                                         left=d['left'][i], top=d['top'][i],
-                                         width=d['width'][i], height=d['height'][i])
+            # DocumentWord.objects.create(document=document, file=file, word=word,
+            #                              left=d['left'][i], top=d['top'][i],
+            #                              width=d['width'][i], height=d['height'][i])
             amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
             if (amount>=50.0):
                 w = StudySetWord.objects.create(parent_set=set, word=word, translation="", definition="")
@@ -65,7 +65,7 @@ class File(models.Model):
         super(File, self).save(*args, **kwargs)
 
         # process OCR and add words to DB
-        #get_words(new, self.document, self)
+        get_words(new, self.document, self)
 
     def __str__(self):
         return self.file.name

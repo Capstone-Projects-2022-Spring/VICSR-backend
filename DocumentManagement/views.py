@@ -31,9 +31,9 @@ class DocumentView(viewsets.ModelViewSet):
     @api_view(['GET'])
     def ApiOverview(self, request):
         api_urls = {
-            'all_docs': '/',
-            'Add': '/add',
-            'Delete': '/doc/pk/delete'
+            'All Docs': '/list/',
+            'Add': '/add/',
+            'Delete': '/delete/pk'
         }
         return Response(api_urls)
 
@@ -53,9 +53,6 @@ class DocumentView(viewsets.ModelViewSet):
     def get_docs(request):
 
         docs = Document.objects.filter(owner_id=request.user.id)
-        print(docs.count())
-        print(docs.values())
-
         if docs:
             serializer = DocumentSerializer(docs, many=True)
             return Response(serializer.data)
