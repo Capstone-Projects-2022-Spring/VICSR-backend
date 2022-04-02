@@ -33,7 +33,7 @@ class DocumentView(viewsets.ModelViewSet):
         api_urls = {
             'all_docs': '/',
             'Add': '/add',
-            'Delete': '/doc/pk/delete'
+            'Delete': '/delete/pk'
         }
         return Response(api_urls)
 
@@ -66,5 +66,6 @@ class DocumentView(viewsets.ModelViewSet):
     @api_view(['DELETE'])
     def delete_doc(request, pk):
         doc = get_object_or_404(Document, pk=pk)
-        doc.delete()
+        if str(doc.owner_id) == str(request.user.id):
+            doc.delete()
         return Response(status=status.HTTP_202_ACCEPTED)
