@@ -27,7 +27,8 @@ class FileView(viewsets.ModelViewSet):
         api_urls = {
             'all_files': '/',
             'Add': '/add',
-            'Delete': '/file/pk/delete'
+            'Delete': '/file/pk/delete',
+            'Patch': 'file/pk/patch'
         }
         return Response(api_urls)
 
@@ -62,4 +63,13 @@ class FileView(viewsets.ModelViewSet):
         file = get_object_or_404(File, pk=pk)
         file.delete()
         return Response(status=status.HTTP_202_ACCEPTED)
+
+    @api_view(['PATCH'])
+    def update_file(request, pk):
+        file = FileSerializer(data=request.data, partial=True)
+        if file.is_valid():
+            print("VALID")
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=file.errors)
 
