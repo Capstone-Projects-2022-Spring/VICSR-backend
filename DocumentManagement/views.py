@@ -66,6 +66,8 @@ class DocumentView(viewsets.ModelViewSet):
     @api_view(['DELETE'])
     def delete_doc(request, pk):
         doc = get_object_or_404(Document, pk=pk)
-        if str(doc.owner_id) == str(request.user.id):
+        if str(doc.owner_id_id) == str(request.user.id):
             doc.delete()
-        return Response(status=status.HTTP_202_ACCEPTED)
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
