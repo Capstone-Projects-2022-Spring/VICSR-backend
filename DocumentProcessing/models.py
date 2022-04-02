@@ -35,19 +35,22 @@ def get_words(image, document, file):
     # extract and add to database
     d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
     n_boxes = len(d['text'])
+    bulkList = []
     for i in range(n_boxes):
         if int(float(d['conf'][i])) > 60:
             word = (d['text'][i]).translate(str.maketrans('', '', string.punctuation))
             word_query = StudySetWord.objects.filter(parent_set=set, word=word)
-            # DocumentWord.objects.create(document=document, file=file, word=word,
-            #                            left=d['left'][i], top=d['top'][i],
-            #                           width=d['width'][i], height=d['height'][i])
+           # bulkList.append(DocumentWord(document=document, file=file, word=word,left=d['left'][i], top=d['top'][i],
+            #                             width=d['width'][i], height=d['height'][i]))
+            #DocumentWord.objects.create(document=document, file=file, word=word,
+             #                           left=d['left'][i], top=d['top'][i],
+              #                          width=d['width'][i], height=d['height'][i])
             if len(word_query) == 0:
-                amount = check_highlight_amount(image,
-                                                (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
+                amount = check_highlight_amount(image,(word, (d['left'][i], d['top'][i],
+                                                              d['width'][i], d['height'][i])))
                 if amount >= 50.0:
                     StudySetWord.objects.create(parent_set=set, word=word, translation="", definition="")
-
+    #DocumentWord.objects.bulk_create(bulkList)
 
 class File(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='files')
