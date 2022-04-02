@@ -18,9 +18,6 @@ class FileSerializer(serializers.ModelSerializer):
             file = File.objects.create(**validated_data)
         return file
 
-    def partial_update(self, request, *args, **kwargs):
-        print("PARTIAL UPDATE")
-        print(request)
 
 
 def pdf_images(document, file):

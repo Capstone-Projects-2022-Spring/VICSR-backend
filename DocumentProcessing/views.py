@@ -64,12 +64,12 @@ class FileView(viewsets.ModelViewSet):
         file.delete()
         return Response(status=status.HTTP_202_ACCEPTED)
 
-    @api_view(['PATCH'])
+    @api_view(['POST'])
     def update_file(request, pk):
-        file = FileSerializer(data=request.data, partial=True)
-        if file.is_valid():
-            print("VALID")
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data=file.errors)
+        file = File.objects.get(id=pk)
+        file.file = request.data['file']
+        file.save(update_fields=['file'])
+        return Response(FileSerializer(file).data)
+
+
 

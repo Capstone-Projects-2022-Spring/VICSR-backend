@@ -29,7 +29,8 @@ def get_words(image, document, file):
     if (len(query)==0):
         set = StudySet.objects.create(generated_by=document, title=document.filename)
     else:
-        set = query
+        set = query.first()
+
 
     # extract and add to database
     d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
@@ -37,12 +38,14 @@ def get_words(image, document, file):
     for i in range(n_boxes):
         if int(float(d['conf'][i])) > 60:
             word = (d['text'][i]).translate(str.maketrans('', '', string.punctuation))
-            DocumentWord.objects.create(document=document, file=file, word=word,
-                                         left=d['left'][i], top=d['top'][i],
-                                         width=d['width'][i], height=d['height'][i])
+           # DocumentWord.objects.create(document=document, file=file, word=word,
+            #                             left=d['left'][i], top=d['top'][i],
+             #                            width=d['width'][i], height=d['height'][i])
             amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
             if (amount>=50.0):
-                w = StudySetWord.objects.create(parent_set=set, word=word, translation="", definition="")
+                word_query = StudySetWord.objects.filter(parent_set=set, word=word)
+                if(len(word_query)==0):
+                    StudySetWord.objects.create(parent_set=set, word=word, translation="", definition="")
 
 
 
@@ -51,21 +54,27 @@ class File(models.Model):
     file = models.FileField(storage=MediaStorage())
 
     def save(self, *args, **kwargs):
-        # open file as PIL Image and send for processing
+        # open file as PIL Image
         pil_image_obj = Image.open(self.file.file)
-        new = preprocess(pil_image_obj)
+        if (self.pk):
+            image_io = BytesIO()
+            pil_image_obj.save(image_io, format="PNG")
+        else:
+            #send for processing
+            pil_image_obj = preprocess(pil_image_obj)
 
-        # after processed save as file and replace file in model
-        image_io = BytesIO()
-        new.save(image_io, format="PNG")
-        image_file = InMemoryUploadedFile(image_io, None, self.file.name, 'image/png',
-                                          image_io.tell(), None)
-        self.file = image_file
+            # after processed save as file and replace file in model
+            image_io = BytesIO()
+            pil_image_obj.save(image_io, format="PNG")
+            image_file = InMemoryUploadedFile(image_io, None, self.file.name, 'image/png',
+                                              image_io.tell(), None)
+            self.file = image_file
+
         self.file.name = (str(self.document.owner_id) + "/" + self.document.filename + "/" + self.file.name)
         super(File, self).save(*args, **kwargs)
 
         # process OCR and add words to DB
-        #get_words(new, self.document, self)
+        get_words(pil_image_obj, self.document, self)
 
     def __str__(self):
         return self.file.name
