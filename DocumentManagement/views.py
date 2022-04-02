@@ -65,8 +65,13 @@ class DocumentView(viewsets.ModelViewSet):
     @api_view(['DELETE'])
     def delete_doc(request, pk):
         doc = get_object_or_404(Document, pk=pk)
-        doc.delete()
-        return Response(status=status.HTTP_202_ACCEPTED)
+
+        if str(doc.owner_id_id) == str(request.user.id):
+            doc.delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
 
     @api_view(['POST'])
     def update_doc(request, pk):
@@ -76,3 +81,4 @@ class DocumentView(viewsets.ModelViewSet):
 
         doc.save(update_fields=['filename'])
         return Response(doc.filename)
+
