@@ -5,6 +5,7 @@ import string
 import pytesseract
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from pytesseract import Output
+import time
 
 try:
     from PIL import Image  # PIL is the pillow
@@ -24,13 +25,12 @@ def get_words(image, document, file):
     gray_img = img_hsv[:, :, 2]
     out_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 22)
 
-    #check if study set exists or not -- if not create it
+    # check if study set exists or not -- if not create it
     query = StudySet.objects.filter(generated_by=document)
-    if (len(query)==0):
+    if (len(query) == 0):
         set = StudySet.objects.create(generated_by=document, title=document.filename)
     else:
         set = query.first()
-
 
     # extract and add to database
     d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
@@ -38,15 +38,15 @@ def get_words(image, document, file):
     for i in range(n_boxes):
         if int(float(d['conf'][i])) > 60:
             word = (d['text'][i]).translate(str.maketrans('', '', string.punctuation))
-           # DocumentWord.objects.create(document=document, file=file, word=word,
-            #                             left=d['left'][i], top=d['top'][i],
-             #                            width=d['width'][i], height=d['height'][i])
-            amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
-            if (amount>=50.0):
-                word_query = StudySetWord.objects.filter(parent_set=set, word=word)
-                if(len(word_query)==0):
+            word_query = StudySetWord.objects.filter(parent_set=set, word=word)
+            # DocumentWord.objects.create(document=document, file=file, word=word,
+            #                            left=d['left'][i], top=d['top'][i],
+            #                           width=d['width'][i], height=d['height'][i])
+            if len(word_query) == 0:
+                amount = check_highlight_amount(image,
+                                                (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
+                if amount >= 50.0:
                     StudySetWord.objects.create(parent_set=set, word=word, translation="", definition="")
-
 
 
 class File(models.Model):
@@ -55,13 +55,15 @@ class File(models.Model):
 
     def save(self, *args, **kwargs):
         # open file as PIL Image
+        timestart = time.time()
         pil_image_obj = Image.open(self.file.file)
         if (self.pk):
             image_io = BytesIO()
             pil_image_obj.save(image_io, format="PNG")
         else:
-            #send for processing
+            # send for processing
             pil_image_obj = preprocess(pil_image_obj)
+            print("Preprocess one file time: " + str(time.time() - timestart))
 
             # after processed save as file and replace file in model
             image_io = BytesIO()
@@ -74,7 +76,10 @@ class File(models.Model):
         super(File, self).save(*args, **kwargs)
 
         # process OCR and add words to DB
+        time_ocr = time.time()
         get_words(pil_image_obj, self.document, self)
+        print("time for OCR: " + str(time.time() - time_ocr))
+        print("time from start to end OCR for " + self.file.name + ": " + str(time.time() - timestart))
 
     def __str__(self):
         return self.file.name

@@ -5,6 +5,7 @@ from DocumentProcessing.serializers import FileSerializer
 from DocumentProcessing.models import File
 from pdf2image import convert_from_bytes
 import io
+import time
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -17,6 +18,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         #'date_added',
 
     def create(self, validated_data):
+        timestart=time.time()
         files = self.context['request'].FILES
         document = Document.objects.create(**validated_data)
         for file in files.values():
@@ -24,6 +26,7 @@ class DocumentSerializer(serializers.ModelSerializer):
                pdf_images(document, file)
             else:
                 File.objects.create(document=document, file=file)
+        print("time to create document: " + str(time.time()-timestart))
         return document
 
 def pdf_images(document, file):
