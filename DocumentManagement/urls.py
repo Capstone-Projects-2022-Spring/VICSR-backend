@@ -8,5 +8,6 @@ urlpatterns = [
     path('', DocumentView.ApiOverview, name='docs'),
     path('add/', DocumentView.add_doc, name='add_doc'),
     path('list/', DocumentView.get_docs, name='get_docs'),
-    path('delete/<int:pk>', DocumentView.delete_doc, name='delete_doc')
+    path('delete/<int:pk>', DocumentView.delete_doc, name='delete_doc'),
+    path('update/<int:pk>', DocumentView.update_doc, name='update_doc')
 ]
