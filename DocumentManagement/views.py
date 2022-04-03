@@ -34,7 +34,7 @@ class DocumentView(viewsets.ModelViewSet):
             'all_docs': '/',
             'Add': '/add',
             'Delete': '/delete/pk',
-            'Update': '/update/pk'
+            'Update': '/update/pk',
         }
         return Response(api_urls)
 
