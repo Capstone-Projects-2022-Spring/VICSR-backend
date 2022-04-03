@@ -24,7 +24,7 @@ def get_words(image, document, file):
     gray_img = img_hsv[:, :, 2]
     out_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 22)
 
-    #check if study set exists or not -- if not create it
+    # check if study set exists or not -- if not create it
     query = StudySet.objects.filter(generated_by=document)
     if (len(query)==0):
         set = StudySet.objects.create(owner_id=document.owner_id, generated_by=document, title=document.filename)
@@ -42,7 +42,7 @@ def get_words(image, document, file):
             #                              width=d['width'][i], height=d['height'][i])
             amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
             if (amount>=50.0):
-                w = StudySetWord.objects.create(parent_set=set, word=word, translation="", definition="")
+                w = StudySetWord.objects.create(owner_id=document.owner_id, parent_set=set, word=word, translation="", definition="")
 
 
 

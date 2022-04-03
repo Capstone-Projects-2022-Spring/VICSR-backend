@@ -41,7 +41,6 @@ class StudySetView(viewsets.ModelViewSet):
     def get_sets(request):
 
         study_sets = StudySet.objects.filter(owner_id=request.user.id)
-        print(study_sets)
 
         if study_sets:
             serializer = StudySetSerializer(study_sets, many=True)
@@ -52,7 +51,7 @@ class StudySetView(viewsets.ModelViewSet):
 
     @api_view(['GET'])
     def get_words(request, pk):
-        set_words = StudySetWord.objects.filter(parent_set_id=pk)
+        set_words = StudySetWord.objects.filter(parent_set_id=pk, owner_id=request.user.id)
 
         if set_words:
             serializer = StudySetWordSerializer(set_words, many=True)
@@ -63,7 +62,7 @@ class StudySetView(viewsets.ModelViewSet):
 
     @api_view(['GET'])
     def get_all_words(request):
-        all_words = StudySetWord.objects.all()
+        all_words = StudySetWord.objects.filter(owner_id=request.user.id)
 
         if all_words:
             serializer = StudySetWordSerializer(all_words, many=True)
