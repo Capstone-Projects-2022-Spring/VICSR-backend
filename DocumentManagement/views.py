@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -13,7 +14,6 @@ from django.contrib.auth import get_user, get_user_model
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
-
 
 
 class DocumentView(viewsets.ModelViewSet):
@@ -39,8 +39,11 @@ class DocumentView(viewsets.ModelViewSet):
         return Response(api_urls)
 
     @api_view(['POST'])
+    @swagger_auto_schema(operation_description="Add a new document to user account.")
     def add_doc(request):
-
+        """
+        Add a new document to user account.
+        """
         request.data['owner_id'] = request.user.id
         doc = DocumentSerializer(data=request.data, context={'request': request})
 
@@ -52,7 +55,9 @@ class DocumentView(viewsets.ModelViewSet):
 
     @api_view(['GET'])
     def get_docs(request):
-
+        """
+        Returns list of all documents associated with authenticated user.
+        """
         docs = Document.objects.filter(owner_id=request.user.id)
 
         if docs:
@@ -64,6 +69,9 @@ class DocumentView(viewsets.ModelViewSet):
 
     @api_view(['DELETE'])
     def delete_doc(request, pk):
+        """
+        Delete document, where pk is the document ID.
+        """
         doc = get_object_or_404(Document, pk=pk)
 
         if str(doc.owner_id_id) == str(request.user.id):
@@ -72,10 +80,11 @@ class DocumentView(viewsets.ModelViewSet):
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-
     @api_view(['POST'])
     def update_doc(request, pk):
-
+        """
+        Update the name of a document, where pk is the document ID.
+        """
         doc = Document.objects.get(id=pk)
         doc.filename = request.data['filename']
 
