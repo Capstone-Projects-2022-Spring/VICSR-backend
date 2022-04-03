@@ -32,7 +32,8 @@ class StudySetView(viewsets.ModelViewSet):
     def ApiOverview(self, request):
         api_urls = {
             'Get Sets': '/sets/',
-            'Get words by set': '/sets/pk',
+            'Get set by doc id': 'sets/fromDoc/pk',
+            'Get words by set': '/sets/fromDoc/pk/words',
             'Get all words': 'allWords/',
         }
         return Response(api_urls)
@@ -50,7 +51,18 @@ class StudySetView(viewsets.ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND, data=data)
 
     @api_view(['GET'])
-    def get_words(request, pk):
+    def get_set_by_doc_id(request, pk):
+        set = StudySet.objects.filter(generated_by_id=pk, owner_id=request.user.id)
+
+        if set:
+            serializer = StudySetSerializer(set, many=True)
+            return Response(serializer.data)
+        else:
+            data = {'Study Set Words': set.count()}
+            return Response(status=status.HTTP_404_NOT_FOUND, data=data)
+
+    @api_view(['GET'])
+    def get_words_by_set_id(request, pk):
         set_words = StudySetWord.objects.filter(parent_set_id=pk, owner_id=request.user.id)
 
         if set_words:
