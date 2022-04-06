@@ -17,11 +17,21 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
-from rest_framework import routers
-from DocumentManagement import views
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import routers, permissions
 
-# router = routers.DefaultRouter()
-# router.register(r'docs', views.DocumentView, 'docs')
+
+# Swagger documentation setup
+schema_view = get_schema_view(
+    openapi.Info(
+        title="VICSR API",
+        default_version="v1",
+        description="API documentation for account, document, and vocabulary management",
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
 
 urlpatterns = [
     re_path('admin/', admin.site.urls),
@@ -29,6 +39,9 @@ urlpatterns = [
     path('api/docs/', include('DocumentManagement.urls')),
     path('api/files/', include('DocumentProcessing.urls')),
     path('api/vocab/', include('VocabularyManagement.urls')),
+
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
 if settings.DEBUG:
