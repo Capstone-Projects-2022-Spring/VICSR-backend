@@ -5,6 +5,7 @@ import string
 import pytesseract
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from pytesseract import Output
+import django_rq
 
 try:
     from PIL import Image  # PIL is the pillow
@@ -25,11 +26,9 @@ def get_words(image, document, file):
     out_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 22)
 
     # check if study set exists or not -- if not create it
-    query = StudySet.objects.filter(generated_by=document)
-    if (len(query)==0):
+    set = StudySet.objects.filter(generated_by=document).first()
+    if (not set):
         set = StudySet.objects.create(owner_id=document.owner_id, generated_by=document, title=document.filename)
-    else:
-        set = query.first()
 
     # extract and add to database
     d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
@@ -41,8 +40,9 @@ def get_words(image, document, file):
             bulkList.append(DocumentWord(document=document, file=file, word=word, left=d['left'][i], top=d['top'][i],
                                          right=d['width'][i] + d['left'][i], bottom=d['height'][i] + d['top'][i]))
             amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
-            if (amount>=50.0):
-                w = StudySetWord.objects.create(owner_id=document.owner_id, parent_set=set, word=word, translation="", definition="")
+            if (amount >= 50.0):
+                w = StudySetWord.objects.create(owner_id=document.owner_id, parent_set=set, word=word, translation="",
+                                                definition="")
     DocumentWord.objects.bulk_create(bulkList)
 
 
@@ -65,7 +65,9 @@ class File(models.Model):
         super(File, self).save(*args, **kwargs)
 
         # process OCR and add words to DB
+        #django_rq.enqueue(get_words, new, self.document, self)
         get_words(new, self.document, self)
+
 
     def __str__(self):
         return self.file.name
