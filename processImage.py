@@ -49,8 +49,9 @@ def get_skew_angle(image):
 
     # get angle
     angle = minAreaReact[-1]
-    if angle < -45:
-        angle = 90 + angle
+    print("angle: " + str(angle))
+    if angle < -45.0:
+        angle = 90.0 + angle
     skew_angle = -1.0 * angle
     return skew_angle
 
@@ -66,14 +67,11 @@ def rotate_image(angle):
 
 
 skew = get_skew_angle(img)
-if skew != -90.0:
-    final_img = rotate_image(skew)
-else:
+if -93 <= skew <= -87:
     final_img = img
+else:
+    final_img = rotate_image(skew)
 
-
-# cv2.imshow("final", final_img)
-# cv2.waitKey(0)
 
 # https://dev.to/zirkelc/extract-highlighted-text-from-a-book-using-python-e15
 
@@ -122,12 +120,5 @@ def get_output(image):
         if check_highlight_amount(image, i) >= 50.0:
             text_list.append(i[0])
             print(i[0])
-
-
-# tess_config = r'--tessdata-dir "/usr/local/Cellar/tesseract/5.1.0/share/tessdata/"'
-# pytesseract.pytesseract.tesseract_cmd("/usr/local/Cellar/tesseract/5.1.0/share/tessdata/")
-# print(pytesseract.image_to_string(final_img, lang="eng", config=tess_config))
-# print(pytesseract.image_to_string(final_img))
-
 
 get_output(final_img)
