@@ -50,31 +50,30 @@ def rotate_image(angle, img):
     straight_img = cv2.warpAffine(straight_img, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
     return straight_img
 
+
 def reduce_noise(image):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     denoised_img = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=1)
     return denoised_img
 
 
-
-
 def preprocess(image):
-    #input is PIL Image -> convert to CV image format
+    # input is PIL Image -> convert to CV image format
     img =cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
     skew = get_skew_angle(img)
-    if skew != -90.0:
-        new_img = rotate_image(skew, img)
-    else:
+    if -93 <= skew <= -87:
         new_img = img
-    #new_img = reduce_noise(new_img)
+    else:
+        new_img = rotate_image(skew, img)
 
-    ##after processing -> return to PIL Image and return
+    # new_img = reduce_noise(new_img)
+
+    # after processing -> return to PIL Image and return
     new_img = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
     final_image = Image.fromarray(new_img)
 
     return final_image
-
 
 
 def check_highlight_amount(image, item: tuple):
