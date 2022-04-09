@@ -9,6 +9,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from VocabularyManagement.models import StudySetWord
+from VocabularyManagement.serializers import StudySetWordSerializer
 
 
 class FileView(viewsets.ModelViewSet):
@@ -27,7 +29,8 @@ class FileView(viewsets.ModelViewSet):
         api_urls = {
             'all_files': '/',
             'Add': '/add',
-            'Delete': '/file/pk/delete'
+            'Delete': '/file/pk/delete',
+            'Update': '/update/pk'
         }
         return Response(api_urls)
 
@@ -62,4 +65,19 @@ class FileView(viewsets.ModelViewSet):
         file = get_object_or_404(File, pk=pk)
         file.delete()
         return Response(status=status.HTTP_202_ACCEPTED)
+
+    @api_view(['POST'])
+    def update_highlight(request, pk):
+        file = File.objects.get(id=pk)
+
+        #extract all highlight here
+
+        file.highlight = request.data['highlight']
+
+        file.save(update_fields=['highlight'])
+        data = StudySetWord.objects.filter(parent_set__generated_by=file.document)
+        data2 = StudySetWordSerializer(data, many=True)
+        return Response(data2.data)
+
+
 

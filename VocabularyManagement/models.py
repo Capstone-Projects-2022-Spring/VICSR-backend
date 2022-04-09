@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from DocumentManagement.models import Document
 from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 
@@ -32,4 +34,7 @@ class StudySetWord(models.Model):
         return self.word
 
 
-
+@receiver(post_save, sender=Document)
+def create_studySet(sender, instance, created, **kwargs):
+    if created:
+        StudySet.objects.create(owner_id=instance.owner_id, generated_by=instance, title=instance.filename)
