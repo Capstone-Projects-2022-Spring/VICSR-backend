@@ -59,6 +59,7 @@ def resize_image(image):
 class File(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='files')
     file = models.FileField(storage=MediaStorage())
+    highlight = models.TextField(blank=True)
 
     def save(self, *args, **kwargs):
         # open file as PIL Image and send for processing
