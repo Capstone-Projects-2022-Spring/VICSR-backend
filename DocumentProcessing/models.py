@@ -46,6 +46,16 @@ def get_words(image, document, file):
     DocumentWord.objects.bulk_create(bulkList)
 
 
+def resize_image(image):
+    width, height = image.size
+    image.thumbnail((794, 1123))
+    new_width = width + (794 - width)
+    new_height = height + (1123 - height)
+    result = Image.new(image.mode, (new_width, new_height), (255, 255, 255))
+    result.paste(image)
+    return result
+
+
 class File(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='files')
     file = models.FileField(storage=MediaStorage())
@@ -54,6 +64,7 @@ class File(models.Model):
         # open file as PIL Image and send for processing
         pil_image_obj = Image.open(self.file.file)
         new = preprocess(pil_image_obj)
+        new = resize_image(new)
 
         # after processed save as file and replace file in model
         image_io = BytesIO()

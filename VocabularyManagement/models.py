@@ -37,7 +37,4 @@ class StudySetWord(models.Model):
 @receiver(post_save, sender=Document)
 def create_studySet(sender, instance, created, **kwargs):
     if created:
-        print("IN CREATED - SIGNAL")
-        print(instance)
-        print(sender)
         StudySet.objects.create(owner_id=instance.owner_id, generated_by=instance, title=instance.filename)
