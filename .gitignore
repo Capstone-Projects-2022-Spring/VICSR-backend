@@ -4,4 +4,4 @@ venv/
 **/__pycache__
 backend/config.py
 tesseract/
-key.json
+google-credentials.json

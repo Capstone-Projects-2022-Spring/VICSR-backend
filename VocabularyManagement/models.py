@@ -7,12 +7,12 @@ from django.dispatch import receiver
 from google.cloud import translate
 import json
 
-with open('key.json') as file:
+with open('google-credentials.json') as file:
     data = json.load(file)
 
 
 def translate_text(text, source_lang, target_lang):
-    client = translate.TranslationServiceClient.from_service_account_json('key.json')
+    client = translate.TranslationServiceClient.from_service_account_json('google-credentials.json')
     parent = client.location_path(data['project_id'], "global")
     response = client.get_supported_languages(parent, 'en')
     languages = response.languages
