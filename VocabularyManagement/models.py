@@ -6,15 +6,16 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from google.cloud import translate
 import json
+import os
 
-with open(GOOGLE_CREDENTIALS) as file:
-    data = json.load(file)
-    print(data)
+# with open(GOOGLE_CREDENTIALS) as file:
+#    data = json.load(file)
+#    print(data)
 
 
 def translate_text(text, source_lang, target_lang):
-    client = translate.TranslationServiceClient.from_service_account_json(GOOGLE_CREDENTIALS)
-    parent = client.location_path(GOOGLE_PROJECT_ID, "global")
+    client = translate.TranslationServiceClient.from_service_account_json(os.eviron.get(GOOGLE_CREDENTIALS))
+    parent = client.location_path(os.environ.get(GOOGLE_PROJECT_ID), "global")
     # client = translate.TranslationServiceClient.from_service_account_json('google-credentials.json')
     # parent = client.location_path(data['project_id'], "global")
     response = client.get_supported_languages(parent, 'en')
