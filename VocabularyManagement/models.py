@@ -7,8 +7,9 @@ from django.dispatch import receiver
 from google.cloud import translate
 import json
 
-# with open('google-credentials.json') as file:
-#    data = json.load(file)
+with open(GOOGLE_CREDENTIALS) as file:
+    data = json.load(file)
+    print data
 
 
 def translate_text(text, source_lang, target_lang):
