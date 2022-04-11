@@ -8,11 +8,12 @@ import io
 
 
 class DocumentSerializer(serializers.ModelSerializer):
-    files = FileSerializer(many=True, required=False)
+    #files = FileSerializer(many=True, required=False)
+    files = serializers.SerializerMethodField()
     class Meta:
         model = Document
         fields = ('id', 'owner_id', 'filename', 'files',
-                  'date_added', 'mode', 'language', 'trans_language')
+                   'date_added', 'mode', 'language', 'trans_language')
         #fields = '__all__'
         #'date_added',
 
@@ -25,6 +26,10 @@ class DocumentSerializer(serializers.ModelSerializer):
             else:
                 File.objects.create(document=document, file=file)
         return document
+
+    def get_files(self, instance):
+        file = instance.files.all().order_by('id')
+        return FileSerializer(file, many=True, required=False).data
 
 def pdf_images(document, file):
     name = str(file)[:-4]
