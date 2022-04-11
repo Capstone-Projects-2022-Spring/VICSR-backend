@@ -9,7 +9,7 @@ import json
 
 with open(GOOGLE_CREDENTIALS) as file:
     data = json.load(file)
-    print data
+    print(data)
 
 
 def translate_text(text, source_lang, target_lang):
