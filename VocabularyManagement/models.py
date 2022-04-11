@@ -4,7 +4,30 @@ from DocumentManagement.models import Document
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from google.cloud import translate
+import json
 
+with open('google-credentials.json') as file:
+    data = json.load(file)
+
+
+def translate_text(text, source_lang, target_lang):
+    client = translate.TranslationServiceClient.from_service_account_json('google-credentials.json')
+    parent = client.location_path(data['project_id'], "global")
+    response = client.get_supported_languages(parent, 'en')
+    languages = response.languages
+
+    response = client.translate_text(
+        parent=parent,
+        contents=[text],
+        mime_type="text/plain",
+        source_language_code=source_lang,
+        target_language_code=target_lang
+    )
+    for translation in response.translations:
+        translation = translation.translated_text
+        # print(translation.translated_text)
+    return translation
 
 
 # Create your models here.
@@ -29,6 +52,18 @@ class StudySetWord(models.Model):
     word = models.CharField(max_length=65)
     translation = models.CharField(max_length=65, blank=True)
     definition = models.CharField(max_length=65, blank=True)
+
+    def save(self, *args, **kwargs):
+        set = StudySet.objects.get(id=self.parent_set.id)
+        doc = Document.objects.get(id=set.generated_by.id)
+        mode = doc.mode
+        source_lang = doc.language
+        target_lang = doc.trans_language
+
+        if mode == 'TRL':
+            self.translation = translate_text(self.word, source_lang, target_lang)
+
+        super(StudySetWord, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.word
