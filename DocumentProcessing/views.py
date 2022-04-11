@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from VocabularyManagement.models import StudySetWord
 from VocabularyManagement.serializers import StudySetWordSerializer
+import time
 
 
 class FileView(viewsets.ModelViewSet):
@@ -68,20 +69,21 @@ class FileView(viewsets.ModelViewSet):
 
     @api_view(['POST'])
     def update_highlight(request, pk):
+        starttime = time.time()
         file = File.objects.get(id=pk)
+        print("get specific file ", str(time.time() - starttime))
 
         #extract all highlight here
 
         file.highlight = request.data['highlight']
-        
-        print("request data")
-        print(request.data)
-        print("request data highlight")
-        print(request.data['highlight'])
+        print("get highlight - assign to var ", str(time.time() - starttime))
+
 
         file.save(update_fields=['highlight'])
+        print("Update highlight ", str(time.time()-starttime))
         data = StudySetWord.objects.filter(parent_set__generated_by=file.document)
         data2 = StudySetWordSerializer(data, many=True)
+        print("get return data ",  str(time.time()-starttime))
         return Response(data2.data)
 
 

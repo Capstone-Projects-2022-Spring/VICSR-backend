@@ -37,16 +37,13 @@ def get_words(image, document, file):
     for i in range(n_boxes):
         if int(float(d['conf'][i])) > 60:
             word = (d['text'][i]).translate(str.maketrans('', '', string.punctuation))
-            #check if word already in studyset
-            if len(StudySetWord.objects.filter(parent_set=set, word=word)) == 0:
-                bulkList.append(DocumentWord(document=document, file=file, word=word, left=d['left'][i],
-                                             top=d['top'][i], right=d['width'][i] + d['left'][i],
-                                             bottom=d['height'][i] + d['top'][i]))
-                amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i],
-                                                               d['height'][i])))
-                if (amount >= 50.0):
-                    w = StudySetWord.objects.create(owner_id=document.owner_id, parent_set=set, word=word,
-                                                    translation="", definition="")
+
+            bulkList.append(DocumentWord(document=document, file=file, word=word, left=d['left'][i], top=d['top'][i],
+                                         right=d['width'][i] + d['left'][i], bottom=d['height'][i] + d['top'][i]))
+            amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
+            if (amount >= 50.0):
+                w = StudySetWord.objects.create(owner_id=document.owner_id, parent_set=set, word=word, translation="",
+                                                definition="")
     DocumentWord.objects.bulk_create(bulkList)
 
 
