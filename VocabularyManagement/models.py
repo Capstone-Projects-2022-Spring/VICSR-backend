@@ -17,6 +17,7 @@ private_key_id = os.environ.get('GOOGLE_KEY_ID')
 private_key = os.environ.get('GOOGLE_KEY')
 client_id = os.environ.get('GOOGLE_CLIENT_ID')
 print(project_id)
+print(private_key_id)
 
 google_credentials = {
   "type": "service_account",
