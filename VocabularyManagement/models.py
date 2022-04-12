@@ -8,7 +8,7 @@ from google.cloud import translate
 import json
 import os
 
-# with open(GOOGLE_CREDENTIALS) as file:
+# with open('google-credentials') as file:
 #    data = json.load(file)
 #    print(data)
 
