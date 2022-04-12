@@ -7,8 +7,6 @@ from django.dispatch import receiver
 from google.cloud import translate
 import json
 import os
-from google.cloud import storage
-from google.oauth2 import service_account
 
 # with open('google-credentials') as file:
 #    data = json.load(file)
