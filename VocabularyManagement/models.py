@@ -15,6 +15,7 @@ import os
 def translate_text(text, source_lang, target_lang):
     client = translate.TranslationServiceClient.from_service_account_json(os.environ.get('GOOGLE_CREDENTIALS'))
     parent = client.location_path(os.environ.get('GOOGLE_PROJECT_ID'), "global")
+    
     # client = translate.TranslationServiceClient.from_service_account_json('google-credentials.json')
     # parent = client.location_path(data['project_id'], "global")
     response = client.get_supported_languages(parent, 'en')
