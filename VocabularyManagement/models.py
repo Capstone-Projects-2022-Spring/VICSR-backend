@@ -7,6 +7,8 @@ from django.dispatch import receiver
 from google.cloud import translate
 import json
 import os
+from google.cloud import storage
+from google.oauth2 import service_account
 
 # with open('google-credentials') as file:
 #    data = json.load(file)
@@ -16,28 +18,39 @@ project_id = os.environ.get('GOOGLE_PROJECT_ID')
 private_key_id = os.environ.get('GOOGLE_KEY_ID')
 private_key = os.environ.get('GOOGLE_KEY')
 client_id = os.environ.get('GOOGLE_CLIENT_ID')
-print(project_id)
-print(private_key_id)
 
-google_credentials = {
-  "type": "service_account",
-  "project_id": project_id,
-  "private_key_id": private_key_id,
-  "private_key": private_key,
-  "client_email": "vicsr-582@genuine-compass-346616.iam.gserviceaccount.com",
-  "client_id": client_id,
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/vicsr-582%40genuine-compass-346616.iam.gserviceaccount.com"
-}
-google_credentials['private_key'] = google_credentials['private_key'].replace('\\n', '\n')
+# the json credentials stored as env variable
+json_str = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+
+# generate json - if there are errors here remove newlines in .env
+json_data = json.loads(json_str)
+# the private_key needs to replace \n parsed as string literal with escaped newlines
+json_data['private_key'] = json_data['private_key'].replace('\\n', '\n')
+
+# google_credentials = {
+#   "type": "service_account",
+#   "project_id": project_id,
+#   "private_key_id": private_key_id,
+#   "private_key": private_key,
+#   "client_email": "vicsr-582@genuine-compass-346616.iam.gserviceaccount.com",
+#   "client_id": client_id,
+#   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+#   "token_uri": "https://oauth2.googleapis.com/token",
+#   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+#   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/vicsr-582%40genuine-compass-346616.iam.gserviceaccount.com"
+# }
+# google_credentials['private_key'] = google_credentials['private_key'].replace('\\n', '\n')
+
 
 def translate_text(text, source_lang, target_lang):
+
+    client = translate.TranslationServiceClient()
+    location = "global"
+    parent = f"projects/{project_id}/locations/{location}"
     # client = translate.TranslationServiceClient.from_service_account_json(os.environ.get('GOOGLE_CREDENTIALS'))
     # parent = client.location_path(os.environ.get('GOOGLE_PROJECT_ID'), "global")
-    client = translate.TranslationServiceClient.from_service_account_json(google_credentials)
-    parent = client.location_path(google_credentials['project_id'], "global")
+    # client = translate.TranslationServiceClient.from_service_account_json(google_credentials)
+    # parent = client.location_path(google_credentials['project_id'], "global")
     # client = translate.TranslationServiceClient.from_service_account_json('google-credentials.json')
     # parent = client.location_path(data['project_id'], "global")
     response = client.get_supported_languages(parent, 'en')
