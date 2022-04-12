@@ -6,45 +6,36 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from google.cloud import translate
 import json
+from googletrans import Translator
+import os
 
-with open('google-credentials.json') as file:
-    data = json.load(file)
 
+def translate(text, target):
+    import six
+    from google.cloud import translate_v2 as translate
+    from google.oauth2 import service_account
 
-def translate_text(text, source_lang, target_lang):
-    client = translate.TranslationServiceClient.from_service_account_json('google-credentials.json')
-    parent = client.location_path(data['project_id'], "global")
-    response = client.get_supported_languages(parent, 'en')
-    languages = response.languages
+    credentials = service_account.Credentials.from_service_account_file('google-credentials.json')
+    # credentials = service_account.Credentials.from_service_account_info(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+    translate_client = translate.Client(credentials=credentials)
+    if isinstance(text, six.binary_type):
+        text.decode("utf-8")
 
-    response = client.translate_text(
-        parent=parent,
-        contents=[text],
-        mime_type="text/plain",
-        source_language_code=source_lang,
-        target_language_code=target_lang
-    )
-    for translation in response.translations:
-        translation = translation.translated_text
-        # print(translation.translated_text)
-    return translation
-
+    result = translate_client.translate(text, target_language=target)
+    return result['translatedText']
 
 # Create your models here.
 
-#Vocabulary Management related models/functionality:
-#Vocabulary
-#Study Set
 
-
-#Started study set - will expand on in future sprints
 class StudySet(models.Model):
     owner_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None)
     generated_by = models.ForeignKey(Document, on_delete=models.CASCADE, null=True)
     title = models.CharField(max_length=30)
     # date_added = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return self.title
+
 
 class StudySetWord(models.Model):
     owner_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None)
@@ -61,7 +52,8 @@ class StudySetWord(models.Model):
         target_lang = doc.trans_language
 
         if mode == 'TRL':
-            self.translation = translate_text(self.word, source_lang, target_lang)
+            # self.translation = translate_text(self.word, source_lang, target_lang)
+            self.translation = translate(self.word, target_lang)
 
         super(StudySetWord, self).save(*args, **kwargs)
 
