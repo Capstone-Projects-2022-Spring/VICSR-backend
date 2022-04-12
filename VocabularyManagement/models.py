@@ -1,3 +1,5 @@
+import random
+
 from django.db import models
 from django.contrib.auth.models import User
 from DocumentManagement.models import Document
@@ -8,6 +10,8 @@ from google.cloud import translate
 import json
 from googletrans import Translator
 import os
+import wikipedia
+import wikipediaapi
 
 
 def translate(text, target):
@@ -23,6 +27,17 @@ def translate(text, target):
 
     result = translate_client.translate(text, target_language=target)
     return result['translatedText']
+
+def get_definition(word, lang):
+    wikipedia.set_lang(lang)
+    try:
+        definition = wikipedia.page(word).summary[0:65]
+    except wikipedia.exceptions.DisambiguationError as d:
+        print(d.options[0])
+        definition = wikipedia.page(d.options[0]).summary[0:65]
+    except wikipedia.exceptions.PageError as p:
+        definition = wikipedia.page(wikipedia.suggest(word)).summary[0:65]
+    return definition
 
 # Create your models here.
 
@@ -54,6 +69,10 @@ class StudySetWord(models.Model):
         if mode == 'TRL':
             # self.translation = translate_text(self.word, source_lang, target_lang)
             self.translation = translate(self.word, target_lang)
+            
+        if mode == 'DEF':
+            self.definition = get_definition(self.word, source_lang)
+
 
         super(StudySetWord, self).save(*args, **kwargs)
 
