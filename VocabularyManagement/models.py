@@ -31,7 +31,7 @@ google_credentials = {
   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/vicsr-582%40genuine-compass-346616.iam.gserviceaccount.com"
 }
-
+google_credentials['private_key'] = google_credentials['private_key'].replace('\\n', '\n')
 
 def translate_text(text, source_lang, target_lang):
     # client = translate.TranslationServiceClient.from_service_account_json(os.environ.get('GOOGLE_CREDENTIALS'))
