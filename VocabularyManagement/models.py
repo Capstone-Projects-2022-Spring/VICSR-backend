@@ -12,10 +12,31 @@ import os
 #    data = json.load(file)
 #    print(data)
 
+project_id = os.environ.get('GOOGLE_PROJECT_ID')
+private_key_id = os.environ.get('GOOGLE_KEY_ID')
+private_key_ = os.environ.get('GOOGLE_KEY')
+client_id = os.environ.get('GOOGLE_CLIENT_ID')
+print(project_id)
+
+google_credentials = {
+  "type": "service_account",
+  "project_id": project_id,
+  "private_key_id": private_key_id,
+  "private_key": private_key,
+  "client_email": "vicsr-582@genuine-compass-346616.iam.gserviceaccount.com",
+  "client_id": client_id,
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/vicsr-582%40genuine-compass-346616.iam.gserviceaccount.com"
+}
+
+
 def translate_text(text, source_lang, target_lang):
-    client = translate.TranslationServiceClient.from_service_account_json(os.environ.get('GOOGLE_CREDENTIALS'))
-    parent = client.location_path(os.environ.get('GOOGLE_PROJECT_ID'), "global")
-    
+    # client = translate.TranslationServiceClient.from_service_account_json(os.environ.get('GOOGLE_CREDENTIALS'))
+    # parent = client.location_path(os.environ.get('GOOGLE_PROJECT_ID'), "global")
+    client = translate.TranslationServiceClient.from_service_account_json(google_credentials)
+    parent = client.location_path(google_credentials['project_id'], "global")
     # client = translate.TranslationServiceClient.from_service_account_json('google-credentials.json')
     # parent = client.location_path(data['project_id'], "global")
     response = client.get_supported_languages(parent, 'en')
