@@ -73,15 +73,14 @@ class FileView(viewsets.ModelViewSet):
         #extract all highlight here
 
         file.highlight = request.data['highlight']
-        
-        print("request data")
-        print(request.data)
+
         print("request data highlight")
         print(request.data['highlight'])
 
         file.save(update_fields=['highlight'])
         data = StudySetWord.objects.filter(parent_set__generated_by=file.document)
         data2 = StudySetWordSerializer(data, many=True)
+        del file
         return Response(data2.data)
 
 
