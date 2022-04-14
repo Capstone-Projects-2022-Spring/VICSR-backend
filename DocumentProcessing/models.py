@@ -44,6 +44,7 @@ def get_words(image, document, file):
             if (amount >= 50.0):
                 w = StudySetWord.objects.create(owner_id=document.owner_id, parent_set=set, word=word, translation="",
                                                 definition="")
+    #print(bulkList)
     DocumentWord.objects.bulk_create(bulkList)
 
 
@@ -63,23 +64,27 @@ class File(models.Model):
     highlight = models.TextField(blank=True)
 
     def save(self, *args, **kwargs):
-        # open file as PIL Image and send for processing
-        pil_image_obj = Image.open(self.file.file)
-        new = preprocess(pil_image_obj)
-        new = resize_image(new)
+        ##only do all preprocessing if it is first save, not updates
+        if (self.pk):
+            super(File, self).save(*args, **kwargs)
+        else:
+            # open file as PIL Image and send for processing
+            pil_image_obj = Image.open(self.file.file)
+            new = preprocess(pil_image_obj)
+            new = resize_image(new)
 
-        # after processed save as file and replace file in model
-        image_io = BytesIO()
-        new.save(image_io, format="PNG")
-        image_file = InMemoryUploadedFile(image_io, None, self.file.name, 'image/png',
-                                          image_io.tell(), None)
-        self.file = image_file
-        self.file.name = (str(self.document.owner_id) + "/" + self.document.filename + "/" + self.file.name)
-        super(File, self).save(*args, **kwargs)
+            # after processed save as file and replace file in model
+            image_io = BytesIO()
+            new.save(image_io, format="PNG")
+            image_file = InMemoryUploadedFile(image_io, None, self.file.name, 'image/png',
+                                              image_io.tell(), None)
+            self.file = image_file
+            self.file.name = (str(self.document.owner_id) + "/" + self.document.filename + "/" + self.file.name)
+            super(File, self).save(*args, **kwargs)
 
-        # process OCR and add words to DB
-        #django_rq.enqueue(get_words, new, self.document, self)
-        get_words(new, self.document, self)
+            # process OCR and add words to DB
+            #django_rq.enqueue(get_words, new, self.document, self)
+            get_words(new, self.document, self)
 
 
     def __str__(self):
