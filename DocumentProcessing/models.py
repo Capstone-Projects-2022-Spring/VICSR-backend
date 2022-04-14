@@ -43,6 +43,7 @@ def get_words(image, document, file):
             if (amount >= 50.0):
                 w = StudySetWord.objects.create(owner_id=document.owner_id, parent_set=set, word=word, translation="",
                                                 definition="")
+    print(bulkList)
     DocumentWord.objects.bulk_create(bulkList)
 
 
@@ -63,6 +64,7 @@ class File(models.Model):
 
     def save(self, *args, **kwargs):
         # open file as PIL Image and send for processing
+        #print(self.pk)
         pil_image_obj = Image.open(self.file.file)
         new = preprocess(pil_image_obj)
         new = resize_image(new)

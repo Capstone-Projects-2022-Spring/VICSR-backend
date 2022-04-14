@@ -70,15 +70,30 @@ class FileView(viewsets.ModelViewSet):
     @api_view(['POST'])
     def update_highlight(request, pk):
         file = File.objects.get(id=pk)
+        print("OG data", file.highlight)
 
         #extract all highlight here
-        points = extract_points(request.data['highlight'])
         set = StudySet.objects.filter(generated_by=file.document).first()
-        for i in points:
-            word = DocumentWord.objects.filter(file=file, left__lte=i.get("x"), top__lte=i.get("y"),
-                                               right__gte=i.get("x"), bottom__gte=i.get("y"))
-            print(word)
-            print(len(word))
+        print(set)
+        new_points = extract_points(request.data['highlight'], file.highlight)
+        for i in new_points:
+            for point in i['points']:
+                print(point)
+                word = DocumentWord.objects.filter(file=file, left__lte=point.get("x"), top__lte=point.get("y"),
+                                                         right__gte=point.get("x"), bottom__gte=point.get("y"))
+                print(word)
+                for q in word:
+                    print(q)
+                    print(q.id)
+               # if word.count()!=0:
+                #    q = StudySetWord.objects.filter(parent_set=set, word=word).first()
+                 #   print(q)
+       # set = StudySet.objects.filter(generated_by=file.document).first()
+        #for i in points:
+         #   word = DocumentWord.objects.filter(file=file, left__lte=i.get("x"), top__lte=i.get("y"),
+          #                                     right__gte=i.get("x"), bottom__gte=i.get("y"))
+           # print(word)
+            #print(len(word))
           #  if (len(word)==1):
            #     q = StudySetWord.objects.filter(parent_set=set, word=word).first()
             #    print(q)
@@ -97,8 +112,9 @@ class FileView(viewsets.ModelViewSet):
         del file
         return Response(data2.data)
 
-def extract_points(lines):
-    dict = json.loads(lines)
-    newlines = dict['lines'][0]
-    points = newlines['points']
-    return points
+def extract_points(newLines, oldLines):
+    try:
+        return ( eval(newLines)['lines'])[len(eval(oldLines)['lines']):]
+    except:
+        return eval(newLines)['lines']
+
