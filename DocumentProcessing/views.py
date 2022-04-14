@@ -2,7 +2,7 @@ from django.shortcuts import render
 from requests import Response
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
-from .models import File
+from .models import File, DocumentWord
 from .serializers import FileSerializer
 from rest_framework import viewsets, status
 from rest_framework.authentication import TokenAuthentication
@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from VocabularyManagement.models import StudySetWord
 from VocabularyManagement.serializers import StudySetWordSerializer
+import time, json
 
 
 class FileView(viewsets.ModelViewSet):
@@ -71,6 +72,10 @@ class FileView(viewsets.ModelViewSet):
         file = File.objects.get(id=pk)
 
         #extract all highlight here
+        #lines = extract_points(request.data['highlight'])
+        #for i in lines:
+         #   word = DocumentWord.objects.filter(file=file, left__lte=i.get("x"), top__lte=i.get("y"),
+               #                                right__gte=i.get("x"), bottom__gte=i.get("y"))
 
         file.highlight = request.data['highlight']
 
@@ -83,5 +88,9 @@ class FileView(viewsets.ModelViewSet):
         del file
         return Response(data2.data)
 
-
+def extract_points(lines):
+    dict = json.loads(lines)
+    newlines = dict['lines'][0]
+    points = newlines['points']
+    return points
 
