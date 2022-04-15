@@ -17,6 +17,8 @@ from DocumentManagement.models import Document
 from VocabularyManagement.models import StudySet, StudySetWord
 from .process import preprocess, check_highlight_amount
 
+##google translate codes to tesseract codes
+LANGS = {'en': 'eng', 'fr':'fra', 'de': 'deu', 'lv': 'lav', 'es': 'spa', 'zh-CN': 'chi_sim'}
 
 def get_words(image, document, file):
     image = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
@@ -31,7 +33,7 @@ def get_words(image, document, file):
         set = StudySet.objects.create(owner_id=document.owner_id, generated_by=document, title=document.filename)
 
     # extract and add to database
-    d = pytesseract.image_to_data(out_img, output_type=Output.DICT)
+    d = pytesseract.image_to_data(out_img, lang=LANGS.get(document.language), output_type=Output.DICT)
     n_boxes = len(d['text'])
     bulkList = []
     for i in range(n_boxes):
