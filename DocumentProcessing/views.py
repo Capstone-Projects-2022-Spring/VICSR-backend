@@ -70,46 +70,37 @@ class FileView(viewsets.ModelViewSet):
     @api_view(['POST'])
     def update_highlight(request, pk):
         file = File.objects.get(id=pk)
-        print("OG data", file.highlight)
 
         #extract all highlight here
         set = StudySet.objects.filter(generated_by=file.document).first()
-        print(set)
         new_points = extract_points(request.data['highlight'], file.highlight)
+        words = {}
         for i in new_points:
             for point in i['points']:
-                print(point)
+                #map out frequency of words
                 word = DocumentWord.objects.filter(file=file, left__lte=point.get("x"), top__lte=point.get("y"),
                                                          right__gte=point.get("x"), bottom__gte=point.get("y"))
-                print(word)
-                for q in word:
-                    print(q)
-                    print(q.id)
-               # if word.count()!=0:
-                #    q = StudySetWord.objects.filter(parent_set=set, word=word).first()
-                 #   print(q)
-       # set = StudySet.objects.filter(generated_by=file.document).first()
-        #for i in points:
-         #   word = DocumentWord.objects.filter(file=file, left__lte=i.get("x"), top__lte=i.get("y"),
-          #                                     right__gte=i.get("x"), bottom__gte=i.get("y"))
-           # print(word)
-            #print(len(word))
-          #  if (len(word)==1):
-           #     q = StudySetWord.objects.filter(parent_set=set, word=word).first()
-            #    print(q)
-                #if(len(StudySetWord.objects.filter(parent_set__generated_by=file.document, word=word))==0):
-                 #   print("would create word here?")
+                if (word.count()!=0):
+                    if (word.first() in words):
+                        words[word.first()] +=1
+                    else:
+                        words[word.first()] = 1
+            #iterate map, add to study set if over 5
+            for key, value in words.items():
+                if (value>5):
+                    #check if word is already in studyset
+                    if (StudySetWord.objects.filter(parent_set=set, word=key).count()==0):
+                        StudySetWord.objects.create(owner_id=file.document.owner_id, parent_set=set, word=key.word,
+                                                    translation="",
+                                                    definition="")
 
 
         file.highlight = request.data['highlight']
-
-        print("request data highlight")
-        print(request.data['highlight'])
-
         file.save(update_fields=['highlight'])
         data = StudySetWord.objects.filter(parent_set__generated_by=file.document)
         data2 = StudySetWordSerializer(data, many=True)
         del file
+        del words
         return Response(data2.data)
 
 def extract_points(newLines, oldLines):
