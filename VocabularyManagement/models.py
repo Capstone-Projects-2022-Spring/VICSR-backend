@@ -53,11 +53,18 @@ class StudySet(models.Model):
 
 
 class StudySetWord(models.Model):
+    RANKING_CHOICES = [
+        (1, 'Easy'),
+        (2, 'Medium'),
+        (3, 'Hard')
+    ]
+
     owner_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None)
     parent_set = models.ForeignKey(StudySet, on_delete=models.CASCADE)
     word = models.CharField(max_length=65)
     translation = models.CharField(max_length=65, blank=True)
     definition = models.CharField(max_length=65, blank=True)
+    ranking = models.IntegerField(choices=RANKING_CHOICES, default=2)
 
     def save(self, *args, **kwargs):
         set = StudySet.objects.get(id=self.parent_set.id)
