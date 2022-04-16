@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from requests import Response
+import json
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from .models import File, DocumentWord
@@ -9,9 +10,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from VocabularyManagement.models import StudySetWord
+from VocabularyManagement.models import StudySetWord, StudySet
 from VocabularyManagement.serializers import StudySetWordSerializer
-import time, json
 
 
 class FileView(viewsets.ModelViewSet):
@@ -72,25 +72,40 @@ class FileView(viewsets.ModelViewSet):
         file = File.objects.get(id=pk)
 
         #extract all highlight here
-        #lines = extract_points(request.data['highlight'])
-        #for i in lines:
-         #   word = DocumentWord.objects.filter(file=file, left__lte=i.get("x"), top__lte=i.get("y"),
-               #                                right__gte=i.get("x"), bottom__gte=i.get("y"))
+        set = StudySet.objects.filter(generated_by=file.document).first()
+        new_points = extract_points(request.data['highlight'], file.highlight)
+        words = {}
+        for i in new_points:
+            for point in i['points']:
+                #map out frequency of words
+                word = DocumentWord.objects.filter(file=file, left__lte=point.get("x"), top__lte=point.get("y"),
+                                                         right__gte=point.get("x"), bottom__gte=point.get("y"))
+                if (word.count()!=0):
+                    if (word.first() in words):
+                        words[word.first()] +=1
+                    else:
+                        words[word.first()] = 1
+            #iterate map, add to study set if over 5
+            for key, value in words.items():
+                if (value>5):
+                    #check if word is already in studyset
+                    if (StudySetWord.objects.filter(parent_set=set, word=key).count()==0):
+                        StudySetWord.objects.create(owner_id=file.document.owner_id, parent_set=set, word=key.word,
+                                                    translation="",
+                                                    definition="")
+
 
         file.highlight = request.data['highlight']
-
-        print("request data highlight")
-        print(request.data['highlight'])
-
         file.save(update_fields=['highlight'])
         data = StudySetWord.objects.filter(parent_set__generated_by=file.document)
         data2 = StudySetWordSerializer(data, many=True)
         del file
+        del words
         return Response(data2.data)
 
-def extract_points(lines):
-    dict = json.loads(lines)
-    newlines = dict['lines'][0]
-    points = newlines['points']
-    return points
+def extract_points(newLines, oldLines):
+    try:
+        return ( eval(newLines)['lines'])[len(eval(oldLines)['lines']):]
+    except:
+        return eval(newLines)['lines']
 
