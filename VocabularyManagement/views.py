@@ -64,7 +64,7 @@ class StudySetView(viewsets.ModelViewSet):
 
     @api_view(['GET'])
     def get_words_by_set_id(request, pk):
-        set_words = StudySetWord.objects.filter(parent_set_id=pk, owner_id=request.user.id)
+        set_words = StudySetWord.objects.filter(parent_set_id=pk, owner_id=request.user.id).order_by('-ranking')
 
         if set_words:
             serializer = StudySetWordSerializer(set_words, many=True)
