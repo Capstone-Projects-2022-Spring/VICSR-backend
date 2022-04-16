@@ -64,24 +64,28 @@ class StudySetWord(models.Model):
     word = models.CharField(max_length=65)
     translation = models.CharField(max_length=65, blank=True)
     definition = models.CharField(max_length=65, blank=True)
-    ranking = models.IntegerField(choices=RANKING_CHOICES, default=2)
+    ranking = models.IntegerField(default=2)
 
     def save(self, *args, **kwargs):
-        set = StudySet.objects.get(id=self.parent_set.id)
-        doc = Document.objects.get(id=set.generated_by.id)
-        mode = doc.mode
-        source_lang = doc.language
-        target_lang = doc.trans_language
+        #only translate/define if first save, if changing ranking do not
+        if (self.pk):
+            super(StudySetWord, self).save(*args, **kwargs)
+        else:
+            set = StudySet.objects.get(id=self.parent_set.id)
+            doc = Document.objects.get(id=set.generated_by.id)
+            mode = doc.mode
+            source_lang = doc.language
+            target_lang = doc.trans_language
 
-        if mode == 'TRL':
-            # self.translation = translate_text(self.word, source_lang, target_lang)
-            self.translation = translate(self.word, target_lang)
-            
-        if mode == 'DEF':
-            self.definition = get_definition(self.word, source_lang)
+            if mode == 'TRL':
+                # self.translation = translate_text(self.word, source_lang, target_lang)
+                self.translation = translate(self.word, target_lang)
+
+            if mode == 'DEF':
+                self.definition = get_definition(self.word, source_lang)
 
 
-        super(StudySetWord, self).save(*args, **kwargs)
+            super(StudySetWord, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.word

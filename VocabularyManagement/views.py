@@ -35,6 +35,7 @@ class StudySetView(viewsets.ModelViewSet):
             'Get set by doc id': 'sets/fromDoc/pk',
             'Get words by set': '/sets/fromDoc/pk/words',
             'Get all words': 'allWords/',
+            'Update ranking': 'sets/word/update/pk',
         }
         return Response(api_urls)
 
@@ -82,3 +83,10 @@ class StudySetView(viewsets.ModelViewSet):
         else:
             data = {'Study Set Words': all_words.count()}
             return Response(status=status.HTTP_404_NOT_FOUND, data=data)
+
+    @api_view(['POST'])
+    def update_ranking(request, pk):
+        word = StudySetWord.objects.get(id=pk)
+        word.ranking = request.data['ranking']
+        word.save(update_fields=['ranking'])
+        return Response(word.ranking)
