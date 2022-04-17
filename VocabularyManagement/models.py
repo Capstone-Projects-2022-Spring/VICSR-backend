@@ -31,12 +31,14 @@ def translate(text, target):
 def get_definition(word, lang):
     wikipedia.set_lang(lang)
     try:
-        definition = wikipedia.page(word).summary[0:65]
+        print("here")
+        definition = wikipedia.summary(word, sentences=2)
     except wikipedia.exceptions.DisambiguationError as d:
-        print(d.options[0])
-        definition = wikipedia.page(d.options[0]).summary[0:65]
+        search = wikipedia.page(d.options[0]).title
+        definition = wikipedia.summary(search, sentences=2)
     except wikipedia.exceptions.PageError as p:
-        definition = wikipedia.page(wikipedia.suggest(word)).summary[0:65]
+        search = wikipedia.suggest(word)
+        definition = wikipedia.summary(search, sentences=2)
     return definition
 
 # Create your models here.
@@ -63,7 +65,7 @@ class StudySetWord(models.Model):
     parent_set = models.ForeignKey(StudySet, on_delete=models.CASCADE)
     word = models.CharField(max_length=65)
     translation = models.CharField(max_length=65, blank=True)
-    definition = models.CharField(max_length=65, blank=True)
+    definition = models.CharField(max_length=3000, blank=True)
     ranking = models.IntegerField(default=2)
 
     def save(self, *args, **kwargs):
