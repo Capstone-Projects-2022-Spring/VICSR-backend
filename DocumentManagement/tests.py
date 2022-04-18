@@ -4,17 +4,26 @@ import backend
 from DocumentManagement.models import Document
 from AccountManagement.models import User
 
+
 # Create your tests here.
 class DocumentTestCase(TestCase):
     def setUp(self):
         self.client = Client()
-        #this code doesn't seem to set up a user, as it should
-        user = self.client.force_login(User.objects.get_or_create(email='testuser@test.com', password='testpass')[0])
-        print("user", user)
+        self.user  = User.objects.create_user(username='testuser', email='test@test.com', password='testpass1')
+        Document.objects.create(owner_id=self.user, filename='doc', mode= 'TRL', language= 'en',
+                                trans_language= 'fr')
+        Document.objects.create(owner_id=self.user, filename='doc2', mode='DEF', language='en')
+
+
+    def test_getDocs(self):
+        docs = Document.objects.filter(owner_id=self.user)
+        self.assertEqual(docs.count(), 2)
 
     def test_addDoc(self):
-        doc = Document.objects.create(owner_id_id=1, filename='test_doc', mode= 'TRL', language= 'en', trans_language= 'fr')
+        doc = Document.objects.create(owner_id=self.user, filename='test_doc', mode= 'TRL', language= 'en', trans_language= 'fr')
         self.assertEqual(doc.filename, 'test_doc')
+        docs = Document.objects.filter(owner_id=self.user)
+        self.assertEqual(docs.count(), 3)
 
     def test_addDocAPI(self):
         #get 401 error on test -- need to confirm how to add auth
