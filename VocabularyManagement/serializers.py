@@ -8,6 +8,7 @@ class StudySetSerializer(serializers.ModelSerializer):
 
 
 class StudySetWordSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = StudySetWord
         fields = '__all__'
