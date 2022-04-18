@@ -96,7 +96,7 @@ class StudySetView(viewsets.ModelViewSet):
     def delete_set(request, pk):
         studySet = get_object_or_404(StudySet, pk=pk)
 
-        if str(studySet.owner_id_id) == str(request.user.id):
+        if str(studySet.owner_id_id) == str(request.user.id) and studySet.generated_by is None:
             studySet.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
