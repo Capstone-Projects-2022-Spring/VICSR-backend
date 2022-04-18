@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view
+from django.conf import settings
 
 
 class StudySetView(viewsets.ModelViewSet):
@@ -37,6 +38,7 @@ class StudySetView(viewsets.ModelViewSet):
             'Get all words': 'allWords/',
             'Update ranking': 'sets/word/update/pk',
             'Update name': 'sets/update/pk',
+            'New Set': 'sets/add'
         }
         return Response(api_urls)
 
@@ -99,4 +101,10 @@ class StudySetView(viewsets.ModelViewSet):
         studySet.title = request.data['title']
 
         studySet.save(update_fields=['title'])
+        return Response(studySet.title)
+
+    @api_view(['POST'])
+    def new_set(request):
+        title = request.data['title']
+        studySet = StudySet.objects.create(owner_id=request.user, title=title)
         return Response(studySet.title)
