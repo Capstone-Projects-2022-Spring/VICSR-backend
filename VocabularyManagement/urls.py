@@ -9,4 +9,6 @@ urlpatterns = [
     path('allWords', StudySetView.get_all_words, name='get_all_words'),
     path('sets/words/update/<int:pk>', StudySetView.update_ranking, name='update_ranking'),
     path('sets/delete/<int:pk>', StudySetView.delete_set, name='delete_set'),
+    path('sets/update/<int:pk>', StudySetView.update_name, name='update_name'),
+
 ]

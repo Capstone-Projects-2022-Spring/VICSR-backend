@@ -37,6 +37,7 @@ class StudySetView(viewsets.ModelViewSet):
             'Get all words': 'allWords/',
             'Update ranking': 'sets/word/update/pk',
             'Delete set': 'sets/delete/pk'
+            'Update name': 'sets/update/pk',
         }
         return Response(api_urls)
 
@@ -101,3 +102,13 @@ class StudySetView(viewsets.ModelViewSet):
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    @api_view(['POST'])
+    def update_name(request, pk):
+
+        studySet = StudySet.objects.get(id=pk)
+        studySet.title = request.data['title']
+
+        studySet.save(update_fields=['title'])
+        return Response(studySet.title)
+
