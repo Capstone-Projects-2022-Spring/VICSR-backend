@@ -37,6 +37,7 @@ class StudySetView(viewsets.ModelViewSet):
             'Get words by set': '/sets/fromDoc/pk/words',
             'Get all words': 'allWords/',
             'Update ranking': 'sets/word/update/pk',
+            'Delete set': 'sets/delete/pk',
             'Update name': 'sets/update/pk',
             'New Set': 'sets/add'
         }
@@ -94,6 +95,16 @@ class StudySetView(viewsets.ModelViewSet):
         word.save(update_fields=['ranking'])
         return Response(word.ranking)
 
+    @api_view(['DELETE'])
+    def delete_set(request, pk):
+        studySet = get_object_or_404(StudySet, pk=pk)
+
+        if str(studySet.owner_id_id) == str(request.user.id) and studySet.generated_by is None:
+            studySet.delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
     @api_view(['POST'])
     def update_name(request, pk):
 
@@ -102,9 +113,10 @@ class StudySetView(viewsets.ModelViewSet):
 
         studySet.save(update_fields=['title'])
         return Response(studySet.title)
-
+      
     @api_view(['POST'])
     def new_set(request):
         title = request.data['title']
         studySet = StudySet.objects.create(owner_id=request.user, title=title)
         return Response(studySet.title)
+
