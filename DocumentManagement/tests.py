@@ -32,4 +32,11 @@ class DocumentTestCase(TestCase):
             response = self.client.post('/api/docs/add/', {'filename': 'test_doc', 'file': fp, 'mode': 'TRL',
                                                   'language': 'en', 'trans_language': 'fr'})
         self.assertEqual(response.status_code, 200)
+        docs = Document.objects.filter(owner_id=self.user)
+        self.assertEqual(docs.count(), 3)
 
+    def test_getDocsAPI(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/api/docs/list/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
