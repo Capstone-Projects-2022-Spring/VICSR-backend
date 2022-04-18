@@ -36,6 +36,7 @@ class StudySetView(viewsets.ModelViewSet):
             'Get words by set': '/sets/fromDoc/pk/words',
             'Get all words': 'allWords/',
             'Update ranking': 'sets/word/update/pk',
+            'Update name': 'sets/update/pk',
         }
         return Response(api_urls)
 
@@ -90,3 +91,12 @@ class StudySetView(viewsets.ModelViewSet):
         word.ranking = request.data['ranking']
         word.save(update_fields=['ranking'])
         return Response(word.ranking)
+
+    @api_view(['POST'])
+    def update_name(request, pk):
+
+        studySet = StudySet.objects.get(id=pk)
+        studySet.title = request.data['title']
+
+        studySet.save(update_fields=['title'])
+        return Response(studySet.title)
