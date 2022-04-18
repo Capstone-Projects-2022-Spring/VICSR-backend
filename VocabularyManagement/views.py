@@ -120,3 +120,13 @@ class StudySetView(viewsets.ModelViewSet):
         studySet = StudySet.objects.create(owner_id=request.user, title=title)
         return Response(studySet.title)
 
+    @api_view(['POST'])
+    def add_word_to_set(request):
+        set_id = request.data['setID']
+        word_id = request.data['wordID']
+
+        studySet = StudySet.objects.get(id=set_id)
+        studyWord = StudySetWord.objects.get(id=word_id)
+        studyWord.parent_set.add(studySet)
+
+        return Response(studyWord.parent_set)

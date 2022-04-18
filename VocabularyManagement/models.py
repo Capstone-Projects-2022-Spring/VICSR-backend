@@ -62,7 +62,7 @@ class StudySetWord(models.Model):
     ]
 
     owner_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None)
-    parent_set = models.ForeignKey(StudySet, on_delete=models.CASCADE)
+    parent_set = models.ManyToManyField(StudySet)
     word = models.CharField(max_length=65)
     translation = models.CharField(max_length=65, blank=True)
     definition = models.CharField(max_length=3000, blank=True)

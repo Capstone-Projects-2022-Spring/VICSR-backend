@@ -42,8 +42,11 @@ def get_words(image, document, file):
                                          right=d['width'][i] + d['left'][i], bottom=d['height'][i] + d['top'][i]))
             amount = check_highlight_amount(image, (word, (d['left'][i], d['top'][i], d['width'][i], d['height'][i])))
             if (amount >= 50.0):
-                w = StudySetWord.objects.create(owner_id=document.owner_id, parent_set=set, word=word, translation="",
-                                                definition="")
+                # w = StudySetWord.objects.create(owner_id=document.owner_id, parent_set=set, word=word, translation="", definition="")
+                w = StudySetWord(owner_id=document.owner_id, word=word, translation="", definition="")
+                w.save()
+                w.parent_set.add(set)
+                
     #print(bulkList)
     DocumentWord.objects.bulk_create(bulkList)
 
