@@ -39,7 +39,8 @@ class StudySetView(viewsets.ModelViewSet):
             'Update ranking': 'sets/word/update/pk',
             'Delete set': 'sets/delete/pk',
             'Update name': 'sets/update/pk',
-            'New Set': 'sets/add'
+            'New Set': 'sets/add',
+            'Add word to set': 'sets/addWord',
         }
         return Response(api_urls)
 
@@ -79,7 +80,10 @@ class StudySetView(viewsets.ModelViewSet):
 
     @api_view(['GET'])
     def get_all_words(request):
-        all_words = StudySetWord.objects.filter(owner_id=request.user.id)
+        all_words = StudySetWord.objects.filter(owner_id=request.user.id).exclude(parent_set__generated_by=None)
+
+        # set = StudySet.objects.get(id=self.parent_set.id)
+        # if self.pk or (set.generated_by is None):
 
         if all_words:
             serializer = StudySetWordSerializer(all_words, many=True)
@@ -122,11 +126,15 @@ class StudySetView(viewsets.ModelViewSet):
 
     @api_view(['POST'])
     def add_word_to_set(request):
-        set_id = request.data['setID']
-        word_id = request.data['wordID']
+        set_id = request.data['set_id']
+        word_id = request.data['word_id']
 
         studySet = StudySet.objects.get(id=set_id)
         studyWord = StudySetWord.objects.get(id=word_id)
-        studyWord.parent_set.add(studySet)
+        word = studyWord.word
+        definition = studyWord.definition
+        translation = studyWord.translation
 
-        return Response(studyWord.parent_set)
+        new_word = StudySetWord.objects.create(owner_id=request.user, parent_set=studySet, word=word, translation=translation, definition=definition)
+
+        return Response(new_word.word)
