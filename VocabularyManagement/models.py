@@ -28,6 +28,7 @@ def translate(text, target):
     result = translate_client.translate(text, target_language=target)
     return result['translatedText']
 
+
 def get_definition(word, lang):
     wikipedia.set_lang(lang)
     try:
@@ -69,11 +70,11 @@ class StudySetWord(models.Model):
     ranking = models.IntegerField(default=2)
 
     def save(self, *args, **kwargs):
-        #only translate/define if first save, if changing ranking do not
-        if (self.pk):
+        # only translate/define if first save, if changing ranking do not
+        set = StudySet.objects.get(id=self.parent_set.id)
+        if self.pk or (set.generated_by is None):
             super(StudySetWord, self).save(*args, **kwargs)
         else:
-            set = StudySet.objects.get(id=self.parent_set.id)
             doc = Document.objects.get(id=set.generated_by.id)
             mode = doc.mode
             source_lang = doc.language
@@ -85,7 +86,6 @@ class StudySetWord(models.Model):
 
             if mode == 'DEF':
                 self.definition = get_definition(self.word, source_lang)
-
 
             super(StudySetWord, self).save(*args, **kwargs)
 
