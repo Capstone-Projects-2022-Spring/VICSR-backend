@@ -36,7 +36,7 @@ class StudySetView(viewsets.ModelViewSet):
             'Get words by set': '/sets/fromDoc/pk/words',
             'Get all words': 'allWords/',
             'Update ranking': 'sets/word/update/pk',
-            'Delete set': 'sets/delete/pk'
+            'Delete set': 'sets/delete/pk',
             'Update name': 'sets/update/pk',
         }
         return Response(api_urls)
