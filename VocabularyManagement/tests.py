@@ -42,11 +42,49 @@ class VocabularyTestCase(TestCase):
         self.assertEqual(len(response.data), 3)
 
     def test_updateRankingAPI(self):
-        word = StudySetWord.objects.filter(owner_id=self.user).first().id
+        word = StudySetWord.objects.filter(owner_id=self.user).first()
         self.assertEqual(word.ranking, 2)
-        url = '/api/vocab/sets/words/update/' + str(word)
-        response = self.client.post(url, 3)
+        url = '/api/vocab/sets/words/update/' + str(word.id)
+        response = self.client.post(url, {'ranking': 3})
         self.assertEqual(response.status_code, 200)
+        word = StudySetWord.objects.filter(owner_id=self.user).first()
         self.assertEqual(word.ranking, 3)
 
+    def test_deleteSetAPI(self):
+        newSet = StudySet.objects.create(owner_id=self.user, title="new set")
+        sets = StudySet.objects.filter(owner_id=self.user)
+        self.assertEqual(len(sets), 2)
+        url = '/api/vocab/sets/delete/' + str(newSet.id)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 202)
+        sets = StudySet.objects.filter(owner_id=self.user)
+        self.assertEqual(len(sets), 1)
 
+    def test_renameSetAPI(self):
+        set = StudySet.objects.filter(owner_id=self.user).first()
+        url = '/api/vocab/sets/update/' + str(set.id)
+        response = self.client.post(url, {'title': 'NEW_NAME'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, 'NEW_NAME')
+
+    def test_newSetAPI(self):
+        url = '/api/vocab/sets/add'
+        response = self.client.post(url, {'title': 'NEW_SET'})
+        self.assertEqual(response.status_code, 200)
+        sets = StudySet.objects.filter(owner_id=self.user)
+        self.assertEqual(len(sets), 2)
+
+    def test_addWordToSetAPI(self):
+
+        allWords = StudySetWord.objects.filter(owner_id=self.user)
+        self.assertEqual(len(allWords), 3)
+
+        newSet = StudySet.objects.create(owner_id=self.user, title="new set")
+
+        word = StudySetWord.objects.filter(owner_id=self.user).first()
+        url = '/api/vocab/sets/addWord'
+        response = self.client.post(url, {'set_id': newSet.id, 'word_id': word.id})
+        self.assertEqual(response.status_code, 200)
+
+        allWords = StudySetWord.objects.filter(owner_id=self.user)
+        self.assertEqual(len(allWords), 4)
