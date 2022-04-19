@@ -16,7 +16,7 @@ class DocumentTestCase(TestCase):
         self.client.force_authenticate(user=self.user)
 
     def test_addDocAPI(self):
-        with open('DocumentManagement/testDocuments/highlightDEskewed.png', 'rb') as fp:
+        with open('media/highlightDEskewed.png', 'rb') as fp:
             response = self.client.post('/api/docs/add/', {'filename': 'test_doc', 'file': fp, 'mode': 'TRL',
                                                   'language': 'en', 'trans_language': 'fr'})
         self.assertEqual(response.status_code, 200)
