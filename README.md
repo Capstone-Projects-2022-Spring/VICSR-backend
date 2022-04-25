@@ -1,35 +1,78 @@
 # VICSR Backend
 
-#### Setting up backend to run in PyCharm
-Complete the following steps to configure:
-* Settings -> Project -> PyhthonInterpreter -> <i>select your virtual env</i>
-* Setting -> Django -> <i>set root to backend folder  and verify manage script is manage.py</i>
-* Edit Configurations  ->add Django Server -> <i>Env vars = PYTHONUNBUFFERED=1;DJANGO_SETTINGS_MODULE=backend.settings
- and make sure python interpreter is set</i>
-* Make sure '127.0.0.1' in allowed hosts list in setting.py
+VICSR's backend was built using Django for the server, PostgresSQL V13 for the database. VICSR backend also requires accounts with Amazon S3 Bucket for persistant file storage, Google Translate API, and Wikipedia API. All database tables are built from Django's models. The VICSR Server has the follow apps:
+* AccountManagement
+* DocumentManagement
+* DocumentProcessing
+* VocabularyManagement              
+                          
+Each VICSR server app has associated API calls for the frontend to utilize. 
 
-### VICSR Server
-The VICSR Server is implemented with Django. The components of the VICSR Server have been built asDjango apps (Account Management, Document Management, and Vocabulary Management). As of now they are empty/starting points that need to still be fully implemented. 
+## Deploying // Running for dev
 
-When developing each app/component: 
-* Models, serializers, and views are needed to create APIs. 
-  * Models are for the tables in the database.
-* URL configurations will also need to be set up.
+### Development/Local Setup
+1) Clone or unzip VICSR Backend repository
+2) Install all libraries in requirements.txt
 
-When setting up the development environment, a virtual environment should be used.
+#### Database Setup
+The VICSR Database is implemented with PostgreSQL V13. For local development, follow instructions for your OS [here](https://www.postgresqltutorial.com/postgresql-getting-started/).  Once PostGresSQL is installed create a local database, and complete the following steps:
+1) Update settings.py with database user and password
+2) Run command ```python manage.py``` from project directory
+3) Run command ```makemigrations``` to initialize all Django models
+4) Run command ```migrate``` to build tables in local database
 
-[Django Documentation](https://docs.djangoproject.com/en/4.0/) 
+#### Server Setup
+The VICSR Server is implemented with Django. To run VICSR's Django Server locally, run the following command:                    
+```python manage.py runserver```
 
+#### S3 Bucket, Google API, Wikipedia API
+Sign up for an S3 account and follow Amazon's directions for getting and AWS Access Key ID and Key. Also follow directions give from Google and Wikipedia to access their APIs. Include all related details in a conig file(s). 
 
+### Deploying on Heroku
+##### Initital setup:
+1) Add a Postgres database to the Heroku project
+2) Add the following buildpacks:           
+   * heroku/python            
+   * https://github.com/k16shikano/heroku-buildpack-poppler   
+   * https://github.com/pathwaysmedical/heroku-buildpack-tesseract              
+   * https://github.com/gerywahyunugraha/heroku-google-application-credentials-buildpack.git
+3) Add the following Config Vars:       
+   * ALLOWED_HOSTS | vicsr-api.herokuapp.com  
+   * AWS_ACCESS_KEY_ID | *Your AWS Access Key ID*
+   * AWS_SECRET_ACCESS_KEY | *Your AWS Secret Access Key*
+   * GOOGLE_APPLICATION_CREDENTIALS | google-credentials.json 
+   * GOOGLE_CLIENT_ID | *Your Google client ID*
+   * GOOGLE_CREDENTIALS | *Your Google credentials*
+   * GOOGLE_KEY | *Your Google Key*
+   * GOOGLE_KEY_ID | *Your Google Key ID*
+   * GOOGLE_PROJECT_ID | *Your Google project ID*
+   * S3_BUCKET_NAME | *Your S3 bucket name*
+   * WEB_CONCURRENCY | 2+  *(depending on Heroku tier)*
 
-### Database
-The VICSR Database is implemented with PostgreSQL. The live database will be hosted on Heroku, but for development requires installation on the developer's local machine. Follow instructions for your OS [here](https://www.postgresqltutorial.com/postgresql-getting-started/).  Heroku supports version 13 by default.
+##### Deployment:
+1) Make sure you have Heroku CLI installed              
+2) ```heroku login```                   
+3) Make sure to add heroku remote origin with this command:        
+ ```heroku git:remote -a vicsr-api```
+4) ```git add .```
+5) ```git commit -am "message"```
+6)  ```git push heroku main```
 
-After PostgreSQL is installed, roughly follow this [article](https://stackpython.medium.com/how-to-start-django-project-with-a-database-postgresql-aaa1d74659d8) to set up a new database named <i>vicsr_local</i>. The settings.py file is already configured, but the user should add their password in the password field.
+## Current Features
+- User authentication/management
+- Document Upload:
+     * Split PDF into multiple images
+     * Each image cleaned up and straightened for OCR
+     * Each image resized to frontend canvas size
+     * OCR implemented and any already highlighted words extracted
+     * Associated study set auto-generated
+- Document Management(rename, delete)
+- Live highlight to translation/definition 
+- Custom study set creation
+- Study set words ordered by user feedback
 
-From then onward, the models.py file is used to build the base structure of classes/tables in the database. Steps to build:
-* In PyCharm, go to <i>tools -> Run manage.py Task </i>
-* Run the command <i>makemigrations 'appname' </i> to build table(s) within the specified Django app. 
-* Run the command <i>migrate 'appname'</i> to move to local database.     
-
-<i> To build and migrate all tables in project simply do not include any appname.</i>
+## Known Bugs
+- OCR misses some words, therefore cannot be found in query from frontend highlight.
+- OCR processing upon upload is slow.  To fix this OCR should be implemented as a background process.
+- Some definitions returned from the Wikipedia API are not ideal/the best choice for the word.
+- Sapced repition algorithm not implememnted, only take user's feedback. 
